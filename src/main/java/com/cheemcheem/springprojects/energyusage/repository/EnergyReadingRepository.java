@@ -1,7 +1,7 @@
 package com.cheemcheem.springprojects.energyusage.repository;
 
 import com.cheemcheem.springprojects.energyusage.model.EnergyReading;
-import java.util.List;
+import java.util.Collection;
 import lombok.Data;
 import lombok.NonNull;
 import org.springframework.stereotype.Repository;
@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
 public class EnergyReadingRepository {
 
   @NonNull
-  private List<EnergyReading> readings;
+  private Collection<EnergyReading> readings;
 }

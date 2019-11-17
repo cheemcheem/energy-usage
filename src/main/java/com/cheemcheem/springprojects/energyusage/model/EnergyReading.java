@@ -6,10 +6,12 @@ import com.opencsv.bean.CsvCustomBindByPosition;
 import java.math.BigDecimal;
 import java.util.Date;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 
 @Data
-public class EnergyReading {
+@NoArgsConstructor
+public class EnergyReading implements Comparable<EnergyReading> {
 
   @CsvCustomBindByPosition(converter = CSVDateColumnConverter.class, position = 0)
   @NonNull
@@ -19,6 +21,8 @@ public class EnergyReading {
   @NonNull
   private BigDecimal reading;
 
-  public EnergyReading() {
+  @Override
+  public int compareTo(EnergyReading o) {
+    return getDate().compareTo(o.getDate());
   }
 }

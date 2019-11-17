@@ -6,11 +6,11 @@ import com.opencsv.bean.CsvToBeanBuilder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
+import java.util.Collection;
 
 public class CSVBeanCreator {
 
-  public static List<EnergyReading> getEnergyReadings(String csvPath) throws IOException {
+  public static Collection<EnergyReading> getEnergyReadings(String csvPath) throws IOException {
     var systemResource = ClassLoader.getSystemResource(csvPath).getPath();
     var mappingStrategy = new ColumnPositionMappingStrategy<EnergyReading>();
     mappingStrategy.setType(EnergyReading.class);

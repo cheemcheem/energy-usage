@@ -1,7 +1,6 @@
 package com.cheemcheem.springprojects.energyusage.controller;
 
 import com.cheemcheem.springprojects.energyusage.dto.SpendingRangeDTO;
-import com.cheemcheem.springprojects.energyusage.exception.EmptyRepositoryException;
 import com.cheemcheem.springprojects.energyusage.service.EnergyReadingService;
 import com.cheemcheem.springprojects.energyusage.util.converters.DateConverter;
 import java.util.Date;
@@ -34,11 +33,8 @@ public class EnergyUsageController {
       @RequestParam("startDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date startDate
   ) {
     logger.info("EnergyUsageController.getSpendingFrom");
-    try {
-      return ResponseEntity.ok(energyReadingService.getSpendingFrom(startDate));
-    } catch (EmptyRepositoryException e) {
-      return ResponseEntity.ok(energyReadingService.getEmptySpendingTo(startDate));
-    }
+    return ResponseEntity.ok(energyReadingService.getSpendingFrom(startDate));
+
   }
 
   @GetMapping("/spending/to")
@@ -46,11 +42,8 @@ public class EnergyUsageController {
       @RequestParam("endDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date endDate
   ) {
     logger.info("EnergyUsageController.getSpendingTo");
-    try {
-      return ResponseEntity.ok(energyReadingService.getSpendingTo(endDate));
-    } catch (EmptyRepositoryException e) {
-      return ResponseEntity.ok(energyReadingService.getEmptySpendingFrom(endDate));
-    }
+    return ResponseEntity.ok(energyReadingService.getSpendingTo(endDate));
+
   }
 
 
@@ -60,11 +53,18 @@ public class EnergyUsageController {
       @RequestParam("endDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date endDate
   ) {
     logger.info("EnergyUsageController.getSpendingTo");
-    try {
-      return ResponseEntity.ok(energyReadingService.getSpendingBetween(startDate, endDate));
-    } catch (EmptyRepositoryException e) {
-      return ResponseEntity.ok(energyReadingService.getEmptySpendingBetween(startDate, endDate));
-    }
+    return ResponseEntity.ok(energyReadingService.getSpendingBetween(startDate, endDate));
+
+  }
+
+  @GetMapping("/average/between")
+  public ResponseEntity getAverageSpendingBetween(
+      @RequestParam("startDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date startDate,
+      @RequestParam("endDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date endDate
+  ) {
+    logger.info("EnergyUsageController.getAverageSpendingBetween");
+    return ResponseEntity.ok(energyReadingService.getAverageSpending(startDate, endDate, 7));
+
   }
 
 

@@ -4,7 +4,8 @@ import com.cheemcheem.springprojects.energyusage.model.EnergyReading;
 import com.cheemcheem.springprojects.energyusage.util.importers.CSVBeanCreator;
 import com.cheemcheem.springprojects.energyusage.util.mappers.SpendingRangeMapper;
 import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
+import java.util.TreeSet;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,12 +16,12 @@ public class EnergyReadingConfig {
 
   private final String csvPath;
 
-  @Bean(name = "csvList")
-  public List<EnergyReading> readCSV() throws IOException {
-    return CSVBeanCreator.getEnergyReadings(csvPath);
+  @Bean
+  public Collection<EnergyReading> readCSV() throws IOException {
+    return new TreeSet<>(CSVBeanCreator.getEnergyReadings(csvPath));
   }
 
-  @Bean(name = "spendingRangeMapper")
+  @Bean
   public SpendingRangeMapper makeMapper() {
     return new SpendingRangeMapper();
   }
