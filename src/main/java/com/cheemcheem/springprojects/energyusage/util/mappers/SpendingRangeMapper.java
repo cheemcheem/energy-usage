@@ -1,6 +1,8 @@
 package com.cheemcheem.springprojects.energyusage.util.mappers;
 
 import com.cheemcheem.springprojects.energyusage.dto.SpendingRangeDTO;
+import com.cheemcheem.springprojects.energyusage.exception.InvalidBigDecimalException;
+import com.cheemcheem.springprojects.energyusage.exception.InvalidDateException;
 import com.cheemcheem.springprojects.energyusage.model.SpendingRange;
 import com.cheemcheem.springprojects.energyusage.util.converters.BigDecimalConverter;
 import com.cheemcheem.springprojects.energyusage.util.converters.DateConverter;
@@ -15,7 +17,8 @@ public class SpendingRangeMapper {
     );
   }
 
-  public SpendingRange toModel(SpendingRangeDTO source) {
+  public SpendingRange toModel(SpendingRangeDTO source)
+      throws InvalidDateException, InvalidBigDecimalException {
     return new SpendingRange(
         DateConverter.parse(source.getStartDate()),
         DateConverter.parse(source.getEndDate()),

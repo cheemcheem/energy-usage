@@ -8,9 +8,11 @@ import java.util.Date;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@RequiredArgsConstructor
 public class EnergyReading implements Comparable<EnergyReading> {
 
   @CsvCustomBindByPosition(converter = CSVDateColumnConverter.class, position = 0)

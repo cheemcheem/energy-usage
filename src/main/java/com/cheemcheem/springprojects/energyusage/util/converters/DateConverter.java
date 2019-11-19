@@ -11,7 +11,7 @@ public class DateConverter {
   public static final String PATTERN = "dd/MM/yyyy HH:mm";
   private static final DateFormat DATE_FORMAT = new SimpleDateFormat(PATTERN);
 
-  public synchronized static Date parse(String value) {
+  public synchronized static Date parse(String value) throws InvalidDateException {
     try {
       return DateConverter.DATE_FORMAT.parse(value);
     } catch (ParseException cause) {

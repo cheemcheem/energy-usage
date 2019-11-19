@@ -1,8 +1,8 @@
 package com.cheemcheem.springprojects.energyusage.exception;
 
-public class InvalidDateException extends RuntimeException {
+public class InvalidDateException extends Exception {
 
   public InvalidDateException(String invalidDate, Throwable cause) {
-    super("Failed to parse date '" + invalidDate + "'. Reason: " + cause.getMessage() + ".");
+    super("Failed to parse '" + invalidDate + "' as Date. Reason: " + cause.getMessage() + ".");
   }
 }

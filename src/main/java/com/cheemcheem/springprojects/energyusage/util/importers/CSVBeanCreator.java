@@ -7,15 +7,28 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 public class CSVBeanCreator {
 
-  public static Collection<EnergyReading> getEnergyReadings(String csvPath) throws IOException {
-    var systemResource = ClassLoader.getSystemResource(csvPath).getPath();
+  @NonNull
+  private final String csvPath;
+  private String systemResource;
+
+  public void initialise() {
+    this.systemResource = ClassLoader.getSystemResource(this.csvPath).getPath();
+  }
+
+  public Collection<EnergyReading> getEnergyReadings() throws IOException {
+    if (this.systemResource == null) {
+      throw new IllegalStateException("This instance has not been initialised with initialise().");
+    }
     var mappingStrategy = new ColumnPositionMappingStrategy<EnergyReading>();
     mappingStrategy.setType(EnergyReading.class);
 
-    var reader = Files.newBufferedReader(Path.of(systemResource));
+    var reader = Files.newBufferedReader(Path.of(this.systemResource));
     var csvToBean = new CsvToBeanBuilder<EnergyReading>(reader)
         .withType(EnergyReading.class)
         .withMappingStrategy(mappingStrategy)

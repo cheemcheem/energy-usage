@@ -29,8 +29,11 @@ import org.springframework.stereotype.Service;
 public class EnergyReadingService {
 
   private final Logger logger = LoggerFactory.getLogger(EnergyReadingService.class);
-  private final SpendingRangeMapper spendingRangeMapper;
 
+  @NonNull
+  private final SpendingRangeMapper spendingRangeMapper;
+  @NonNull
+  private final SpendingRangeCalculator spendingRangeCalculator;
   @NonNull
   private final EnergyReadingRepository energyReadingRepository;
 
@@ -39,8 +42,8 @@ public class EnergyReadingService {
 
     @NonNull var readings = energyReadingRepository.getReadings();
     try {
-      var spendingRange = SpendingRangeCalculator.generateForReadings(readings);
-      return spendingRangeMapper.toDTO(spendingRange);
+      var spendingRange = this.spendingRangeCalculator.generateForReadings(readings);
+      return this.spendingRangeMapper.toDTO(spendingRange);
     } catch (EmptyRepositoryException e) {
       logger.warn(e.getMessage());
       return getEmptySpendingAll();
@@ -50,15 +53,15 @@ public class EnergyReadingService {
   public SpendingRangeDTO getSpendingFrom(Date startDate) {
     logger.info("Get spending from '" + startDate + "'.");
 
-    @NonNull var readings = SpendingRangeCalculator.filterForRange(
+    @NonNull var readings = this.spendingRangeCalculator.filterForRange(
         energyReadingRepository.getReadings(),
         startDate,
         Date.from(Instant.now())
     );
 
     try {
-      var spendingRange = SpendingRangeCalculator.generateForReadings(readings);
-      return spendingRangeMapper.toDTO(spendingRange);
+      var spendingRange = this.spendingRangeCalculator.generateForReadings(readings);
+      return this.spendingRangeMapper.toDTO(spendingRange);
     } catch (EmptyRepositoryException e) {
       logger.warn(e.getMessage());
       return getEmptySpendingFrom(startDate);
@@ -67,14 +70,14 @@ public class EnergyReadingService {
 
   public SpendingRangeDTO getSpendingTo(Date endDate) {
     logger.info("Get spending to '" + endDate + "'.");
-    @NonNull var readings = SpendingRangeCalculator.filterForRange(
+    @NonNull var readings = this.spendingRangeCalculator.filterForRange(
         energyReadingRepository.getReadings(),
         Date.from(Instant.EPOCH),
         endDate
     );
     try {
-      var spendingRange = SpendingRangeCalculator.generateForReadings(readings);
-      return spendingRangeMapper.toDTO(spendingRange);
+      var spendingRange = this.spendingRangeCalculator.generateForReadings(readings);
+      return this.spendingRangeMapper.toDTO(spendingRange);
     } catch (EmptyRepositoryException e) {
       logger.warn(e.getMessage());
       return getEmptySpendingTo(endDate);
@@ -84,15 +87,15 @@ public class EnergyReadingService {
   public SpendingRangeDTO getSpendingBetween(Date startDate, Date endDate) {
     logger.info("Get spending from '" + startDate + "' to '" + endDate + "'.");
 
-    @NonNull var readings = SpendingRangeCalculator.filterForRange(
+    @NonNull var readings = this.spendingRangeCalculator.filterForRange(
         energyReadingRepository.getReadings(),
         startDate,
         endDate
     );
 
     try {
-      var spendingRange = SpendingRangeCalculator.generateForReadings(readings);
-      return spendingRangeMapper.toDTO(spendingRange);
+      var spendingRange = this.spendingRangeCalculator.generateForReadings(readings);
+      return this.spendingRangeMapper.toDTO(spendingRange);
     } catch (EmptyRepositoryException e) {
       logger.warn(e.getMessage());
       return getEmptySpendingBetween(startDate, endDate);
@@ -109,7 +112,7 @@ public class EnergyReadingService {
       return List.of();
     }
 
-    @NonNull var allReadings = SpendingRangeCalculator.filterForRange(
+    @NonNull var allReadings = this.spendingRangeCalculator.filterForRange(
         energyReadingRepository.getReadings(),
         startDate,
         endDate
@@ -128,7 +131,7 @@ public class EnergyReadingService {
 
       logger.debug("lastDate = " + lastDate);
       logger.debug("newEndDate = " + newEndDate);
-      @NonNull var subReadings = SpendingRangeCalculator.filterForRange(
+      @NonNull var subReadings = this.spendingRangeCalculator.filterForRange(
           allReadings,
           lastDate,
           newEndDate
@@ -137,7 +140,7 @@ public class EnergyReadingService {
       BigDecimal averageReading;
 
       try {
-        var averageSpending = SpendingRangeCalculator.generateForReadings(subReadings);
+        var averageSpending = this.spendingRangeCalculator.generateForReadings(subReadings);
         averageReading = averageSpending.getUsage()
             .divide(BigDecimal.valueOf(dayGap), RoundingMode.HALF_UP);
       } catch (EmptyRepositoryException e) {
@@ -156,7 +159,7 @@ public class EnergyReadingService {
     }
 
     return averageSpendings.stream()
-        .map(spendingRangeMapper::toDTO)
+        .map(this.spendingRangeMapper::toDTO)
         .collect(Collectors.toList());
 
   }

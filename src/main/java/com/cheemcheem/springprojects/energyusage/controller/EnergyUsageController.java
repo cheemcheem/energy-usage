@@ -4,6 +4,7 @@ import com.cheemcheem.springprojects.energyusage.dto.SpendingRangeDTO;
 import com.cheemcheem.springprojects.energyusage.service.EnergyReadingService;
 import com.cheemcheem.springprojects.energyusage.util.converters.DateConverter;
 import java.util.Date;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class EnergyUsageController {
 
   private final Logger logger = LoggerFactory.getLogger(EnergyUsageController.class);
+  @NonNull
   private final EnergyReadingService energyReadingService;
 
   @GetMapping("/spending/all")
