@@ -10,8 +10,9 @@ import java.util.Collection;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
+
 @RequiredArgsConstructor
-public class CSVBeanCreator {
+public class EnergyReadingsFileReaderService {
 
   @NonNull
   private final String csvPath;
@@ -23,7 +24,8 @@ public class CSVBeanCreator {
 
   public Collection<EnergyReading> getEnergyReadings() throws IOException {
     if (this.systemResource == null) {
-      throw new IllegalStateException("This instance has not been initialised with initialise().");
+      throw new IllegalStateException(
+          "This instance has not been initialised successfully with initialise().");
     }
     var mappingStrategy = new ColumnPositionMappingStrategy<EnergyReading>();
     mappingStrategy.setType(EnergyReading.class);

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.cheemcheem.springprojects.energyusage.exception.EmptyRepositoryException;
 import com.cheemcheem.springprojects.energyusage.model.EnergyReading;
+import com.cheemcheem.springprojects.energyusage.service.CalculatorService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -21,14 +22,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
-class SpendingRangeCalculatorTest {
+class CalculatorServiceTest {
 
   @Autowired
-  private SpendingRangeCalculator spendingRangeCalculator;
+  private CalculatorService calculatorService;
 
   @Test
   void contextLoads() {
-    assertThat(spendingRangeCalculator).isNotNull();
+    assertThat(calculatorService).isNotNull();
   }
 
   @Nested
@@ -40,7 +41,7 @@ class SpendingRangeCalculatorTest {
       var endDate = new Date();
       var readings = new ArrayList<EnergyReading>();
       assertDoesNotThrow(
-          () -> spendingRangeCalculator.filterForRange(readings, startDate, endDate));
+          () -> calculatorService.filterForRange(readings, startDate, endDate));
     }
 
     @Test
@@ -63,7 +64,7 @@ class SpendingRangeCalculatorTest {
           startReading,
           endReading
       );
-      var filteredReadings = spendingRangeCalculator.filterForRange(readings, startDate, endDate);
+      var filteredReadings = calculatorService.filterForRange(readings, startDate, endDate);
 
       assertThat(filteredReadings)
           .contains(startReading, endReading);
@@ -89,7 +90,7 @@ class SpendingRangeCalculatorTest {
           startReading,
           endReading
       );
-      var filteredReadings = spendingRangeCalculator.filterForRange(readings, startDate, endDate);
+      var filteredReadings = calculatorService.filterForRange(readings, startDate, endDate);
 
       assertThat(filteredReadings)
           .contains(startReading, endReading);
@@ -115,7 +116,7 @@ class SpendingRangeCalculatorTest {
           startReading,
           endReading
       );
-      var filteredReadings = spendingRangeCalculator.filterForRange(readings, startDate, endDate);
+      var filteredReadings = calculatorService.filterForRange(readings, startDate, endDate);
 
       assertThat(filteredReadings)
           .contains(startReading, endReading);
@@ -141,7 +142,7 @@ class SpendingRangeCalculatorTest {
           startReading,
           endReading
       );
-      var filteredReadings = spendingRangeCalculator.filterForRange(readings, startDate, endDate);
+      var filteredReadings = calculatorService.filterForRange(readings, startDate, endDate);
 
       assertThat(filteredReadings)
           .contains(startReading, endReading);
@@ -167,7 +168,7 @@ class SpendingRangeCalculatorTest {
           startReading,
           endReading
       );
-      var filteredReadings = spendingRangeCalculator.filterForRange(readings, startDate, endDate);
+      var filteredReadings = calculatorService.filterForRange(readings, startDate, endDate);
 
       assertThat(filteredReadings)
           .contains(startReading, endReading);
@@ -209,7 +210,7 @@ class SpendingRangeCalculatorTest {
           endReading,
           postEndReading
       );
-      var filteredReadings = spendingRangeCalculator.filterForRange(readings, startDate, endDate);
+      var filteredReadings = calculatorService.filterForRange(readings, startDate, endDate);
 
       assertThat(filteredReadings)
           .containsOnly(startReading, endReading)
@@ -252,7 +253,7 @@ class SpendingRangeCalculatorTest {
           endReading,
           postEndReading
       );
-      var filteredReadings = spendingRangeCalculator.filterForRange(readings, startDate, endDate);
+      var filteredReadings = calculatorService.filterForRange(readings, startDate, endDate);
 
       assertThat(filteredReadings)
           .containsOnly(startReading, endReading)
@@ -295,7 +296,7 @@ class SpendingRangeCalculatorTest {
           endReading,
           postEndReading
       );
-      var filteredReadings = spendingRangeCalculator.filterForRange(readings, startDate, endDate);
+      var filteredReadings = calculatorService.filterForRange(readings, startDate, endDate);
 
       assertThat(filteredReadings)
           .containsOnly(startReading, endReading)
@@ -338,7 +339,7 @@ class SpendingRangeCalculatorTest {
           endReading,
           postEndReading
       );
-      var filteredReadings = spendingRangeCalculator.filterForRange(readings, startDate, endDate);
+      var filteredReadings = calculatorService.filterForRange(readings, startDate, endDate);
 
       assertThat(filteredReadings)
           .containsOnly(startReading, endReading)
@@ -381,7 +382,7 @@ class SpendingRangeCalculatorTest {
           endReading,
           postEndReading
       );
-      var filteredReadings = spendingRangeCalculator.filterForRange(readings, startDate, endDate);
+      var filteredReadings = calculatorService.filterForRange(readings, startDate, endDate);
 
       assertThat(filteredReadings)
           .containsOnly(startReading, endReading)
@@ -396,7 +397,7 @@ class SpendingRangeCalculatorTest {
     void generateFailsCorrectlyWhenNoReadings() {
       List<EnergyReading> readings = List.of();
       assertThrows(EmptyRepositoryException.class,
-          () -> spendingRangeCalculator.generateForReadings(readings));
+          () -> calculatorService.generateForReadings(readings));
     }
 
     @Test
@@ -407,7 +408,7 @@ class SpendingRangeCalculatorTest {
           )
       );
 
-      var spendingRange = spendingRangeCalculator.generateForReadings(readings);
+      var spendingRange = calculatorService.generateForReadings(readings);
 
       assertThat(spendingRange.getUsage()).isEqualTo(BigDecimal.ZERO);
 
@@ -423,7 +424,7 @@ class SpendingRangeCalculatorTest {
               new Date(2), BigDecimal.ZERO
           )
       );
-      var spendingRange = spendingRangeCalculator.generateForReadings(readings);
+      var spendingRange = calculatorService.generateForReadings(readings);
       assertThat(spendingRange.getUsage()).isEqualTo(BigDecimal.ZERO);
     }
 
@@ -436,7 +437,7 @@ class SpendingRangeCalculatorTest {
           )
       );
 
-      var spendingRange = spendingRangeCalculator.generateForReadings(readings);
+      var spendingRange = calculatorService.generateForReadings(readings);
 
       assertThat(spendingRange.getUsage()).isEqualTo(BigDecimal.valueOf(0));
 
@@ -452,7 +453,7 @@ class SpendingRangeCalculatorTest {
               new Date(2), BigDecimal.valueOf(9)
           )
       );
-      var spendingRange = spendingRangeCalculator.generateForReadings(readings);
+      var spendingRange = calculatorService.generateForReadings(readings);
       assertThat(spendingRange.getUsage()).isEqualTo(BigDecimal.valueOf(1));
     }
 
@@ -472,7 +473,7 @@ class SpendingRangeCalculatorTest {
               new Date(4), BigDecimal.valueOf(19)
           )
       );
-      var spendingRange = spendingRangeCalculator.generateForReadings(readings);
+      var spendingRange = calculatorService.generateForReadings(readings);
       assertThat(spendingRange.getUsage()).isEqualTo(BigDecimal.valueOf(2));
     }
 
@@ -485,7 +486,7 @@ class SpendingRangeCalculatorTest {
           )
       );
 
-      var spendingRange = spendingRangeCalculator.generateForReadings(readings);
+      var spendingRange = calculatorService.generateForReadings(readings);
 
       assertThat(spendingRange.getUsage()).isEqualTo(BigDecimal.valueOf(0));
 
@@ -501,7 +502,7 @@ class SpendingRangeCalculatorTest {
               new Date(2), BigDecimal.valueOf(-11)
           )
       );
-      var spendingRange = spendingRangeCalculator.generateForReadings(readings);
+      var spendingRange = calculatorService.generateForReadings(readings);
       assertThat(spendingRange.getUsage()).isEqualTo(BigDecimal.valueOf(1));
     }
 
@@ -521,7 +522,7 @@ class SpendingRangeCalculatorTest {
               new Date(4), BigDecimal.valueOf(-6)
           )
       );
-      var spendingRange = spendingRangeCalculator.generateForReadings(readings);
+      var spendingRange = calculatorService.generateForReadings(readings);
       assertThat(spendingRange.getUsage()).isEqualTo(BigDecimal.valueOf(2));
     }
 
@@ -536,7 +537,7 @@ class SpendingRangeCalculatorTest {
               new Date(2), BigDecimal.valueOf(11)
           )
       );
-      var spendingRange = spendingRangeCalculator.generateForReadings(readings);
+      var spendingRange = calculatorService.generateForReadings(readings);
       assertThat(spendingRange.getUsage()).isEqualTo(BigDecimal.ZERO);
     }
 
@@ -550,7 +551,7 @@ class SpendingRangeCalculatorTest {
               new Date(2), BigDecimal.valueOf(-11)
           )
       );
-      var spendingRange = spendingRangeCalculator.generateForReadings(readings);
+      var spendingRange = calculatorService.generateForReadings(readings);
       assertThat(spendingRange.getUsage()).isEqualTo(BigDecimal.valueOf(21));
     }
 
@@ -571,7 +572,7 @@ class SpendingRangeCalculatorTest {
               new Date(4), BigDecimal.valueOf(-6)
           )
       );
-      var spendingRange = spendingRangeCalculator.generateForReadings(readings);
+      var spendingRange = calculatorService.generateForReadings(readings);
       assertThat(spendingRange.getUsage()).isEqualTo(BigDecimal.valueOf(32));
     }
 

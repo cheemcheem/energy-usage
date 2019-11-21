@@ -1,8 +1,7 @@
 package com.cheemcheem.springprojects.energyusage.config;
 
 import com.cheemcheem.springprojects.energyusage.model.EnergyReading;
-import com.cheemcheem.springprojects.energyusage.util.SpendingRangeCalculator;
-import com.cheemcheem.springprojects.energyusage.util.importers.CSVBeanCreator;
+import com.cheemcheem.springprojects.energyusage.util.importers.EnergyReadingsFileReaderService;
 import com.cheemcheem.springprojects.energyusage.util.mappers.SpendingRangeMapper;
 import java.io.IOException;
 import java.util.Collection;
@@ -21,7 +20,7 @@ public class EnergyReadingConfig {
 
   @Bean
   public Collection<EnergyReading> readCSV() throws IOException {
-    var csvBeanCreator = new CSVBeanCreator(this.csvPath);
+    var csvBeanCreator = new EnergyReadingsFileReaderService(this.csvPath);
     csvBeanCreator.initialise();
     return new TreeSet<>(csvBeanCreator.getEnergyReadings());
   }
@@ -31,8 +30,4 @@ public class EnergyReadingConfig {
     return new SpendingRangeMapper();
   }
 
-  @Bean
-  public SpendingRangeCalculator makeCalculator() {
-    return new SpendingRangeCalculator();
-  }
 }
