@@ -41,7 +41,6 @@ public class CalculatorService {
         .collect(Collectors.toCollection(TreeSet::new));
   }
 
-
   private Predicate<EnergyReading> readingWithinDates(Date startDate, Date endDate) {
     return r -> (r.getDate().after(startDate) || r.getDate().equals(startDate))
         && (r.getDate().before(endDate) || r.getDate().equals(endDate));
@@ -83,6 +82,7 @@ public class CalculatorService {
     BiFunction<Date, Date, Long> daysBetween =
         (start, end) -> ChronoUnit.DAYS.between(start.toInstant(), end.toInstant());
 
+    // Exceptional case: date range too small for gap
     if (daysBetween.apply(startDate, endDate) < dayGap) {
       return List.of();
     }
@@ -152,40 +152,46 @@ public class CalculatorService {
         .map(EnergyReading::getReading)
         .collect(Collectors.toList());
 
-    var usage = BigDecimal.ZERO;
-    var earlierUsage = BigDecimal.ZERO;
+    var totalUsage = BigDecimal.ZERO;
+    var lastUsage = BigDecimal.ZERO;
 
-    // Handle negative usage values
-    // Otherwise would have been much fewer lines
-    for (BigDecimal currentUsage : sortedUsages) {
-      if (currentUsage.compareTo(BigDecimal.ZERO) > 0) {
-        // current +
-        if (earlierUsage.compareTo(BigDecimal.ZERO) > 0) {
-          // earlier -
-          if (earlierUsage.compareTo(currentUsage) > 0) {
-            usage = usage.add(earlierUsage.subtract(currentUsage));
-          }
-        }
-      }
-
-      if (currentUsage.compareTo(BigDecimal.ZERO) < 0) {
-        // current -
-        if (earlierUsage.compareTo(BigDecimal.ZERO) > 0) {
-          // earlier +
-          usage = usage.add(earlierUsage.subtract(currentUsage));
-        }
-
-        if (earlierUsage.compareTo(BigDecimal.ZERO) < 0) {
-          // earlier -
-          if (earlierUsage.compareTo(currentUsage) > 0) {
-            usage = usage.add(earlierUsage.subtract(currentUsage));
-          }
-        }
-      }
-      earlierUsage = currentUsage;
+    for (BigDecimal thisUsage : sortedUsages) {
+      totalUsage = getNewUsage(totalUsage, lastUsage, thisUsage);
+      lastUsage = thisUsage;
     }
 
-    return new SpendingRange(startDate, endDate, usage);
+    return new SpendingRange(startDate, endDate, totalUsage);
+  }
+
+  private BigDecimal getNewUsage(BigDecimal totalUsage, BigDecimal lastUsage,
+      BigDecimal thisUsage) {
+    // Handle negative usage values
+    // Otherwise would have been much fewer lines
+    if (thisUsage.compareTo(BigDecimal.ZERO) > 0) {
+      // current +
+      if (lastUsage.compareTo(BigDecimal.ZERO) > 0) {
+        // earlier -
+        if (lastUsage.compareTo(thisUsage) > 0) {
+          totalUsage = totalUsage.add(lastUsage.subtract(thisUsage));
+        }
+      }
+    }
+
+    if (thisUsage.compareTo(BigDecimal.ZERO) < 0) {
+      // current -
+      if (lastUsage.compareTo(BigDecimal.ZERO) > 0) {
+        // earlier +
+        totalUsage = totalUsage.add(lastUsage.subtract(thisUsage));
+      }
+
+      if (lastUsage.compareTo(BigDecimal.ZERO) < 0) {
+        // earlier -
+        if (lastUsage.compareTo(thisUsage) > 0) {
+          totalUsage = totalUsage.add(lastUsage.subtract(thisUsage));
+        }
+      }
+    }
+    return totalUsage;
   }
 
   private Supplier<EmptyRepositoryException> throwBecauseNothingInStream() {
