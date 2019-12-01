@@ -1,12 +1,16 @@
 package com.cheemcheem.springprojects.energyusage.util.importers;
 
+import com.cheemcheem.springprojects.energyusage.exception.EmptyRepositoryException;
 import com.cheemcheem.springprojects.energyusage.model.EnergyReading;
+import com.cheemcheem.springprojects.energyusage.model.SpendingRange;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvToBeanBuilder;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
@@ -39,5 +43,36 @@ public class EnergyReadingsFileReaderService {
     var list = csvToBean.parse();
     reader.close();
     return list;
+  }
+
+  public Collection<SpendingRange> getEnergyReadingsRange()
+      throws IOException, EmptyRepositoryException {
+    var energyReadings = new ArrayList<>(getEnergyReadings());
+
+    if (energyReadings.size() < 2) {
+      throw new EmptyRepositoryException("Not enough readings to do analysis with.");
+    }
+
+    energyReadings.sort(Comparator.comparing(EnergyReading::getDate));
+
+    var spendingRanges = new ArrayList<SpendingRange>();
+    var lastReading = energyReadings.get(0);
+    for (int i = 1; i < energyReadings.size(); i++) {
+      var currentReading = energyReadings.get(i);
+      if (currentReading.getReading().compareTo(lastReading.getReading()) > 0) {
+        lastReading = currentReading;
+        continue;
+      }
+      spendingRanges.add(
+          new SpendingRange(
+              lastReading.getDate(),
+              currentReading.getDate(),
+              (lastReading.getReading().subtract(currentReading.getReading())).abs()
+          )
+      );
+      lastReading = currentReading;
+
+    }
+    return spendingRanges;
   }
 }
