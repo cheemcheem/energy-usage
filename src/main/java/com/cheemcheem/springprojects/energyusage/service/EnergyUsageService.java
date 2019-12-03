@@ -1,7 +1,7 @@
 package com.cheemcheem.springprojects.energyusage.service;
 
 import com.cheemcheem.springprojects.energyusage.dto.SpendingRangeDTO;
-import com.cheemcheem.springprojects.energyusage.util.mappers.SpendingRangeMapper;
+import com.cheemcheem.springprojects.energyusage.util.mapper.SpendingRangeMapper;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -91,5 +91,24 @@ public class EnergyUsageService {
 
   }
 
+  public List<SpendingRangeDTO> getAverageSpendingBetweenDaily() {
+    logger.info("Get average daily spending over all days.");
 
+    var averageSpendings = this.calculatorService.getAverageSpendingDaily();
+
+    return averageSpendings.stream()
+        .map(this.spendingRangeMapper::toDTO)
+        .collect(Collectors.toList());
+  }
+
+  public List<SpendingRangeDTO> getAverageSpendingBetweenDaily(Date startDate, Date endDate) {
+    logger.info("Get average daily spending from '" + startDate + "' to '" + endDate + "'.");
+
+    var averageSpendings = this.calculatorService.getAverageSpendingDaily(startDate, endDate);
+
+    return averageSpendings.stream()
+        .map(this.spendingRangeMapper::toDTO)
+        .collect(Collectors.toList());
+
+  }
 }

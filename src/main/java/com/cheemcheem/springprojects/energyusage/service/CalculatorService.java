@@ -3,8 +3,10 @@ package com.cheemcheem.springprojects.energyusage.service;
 import com.cheemcheem.springprojects.energyusage.model.SpendingRange;
 import com.cheemcheem.springprojects.energyusage.repository.EnergyReadingRepository;
 import com.cheemcheem.springprojects.energyusage.repository.SpendingRangeRepository;
+import com.cheemcheem.springprojects.energyusage.util.comparison.InstantComparison;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -112,10 +114,76 @@ public class CalculatorService {
 
   }
 
-  private SpendingRange getSpending(Date startDate, Date endDate) {
-    var spendingRanges = new ArrayList<>(spendingRangeRepository.getSpendingRanges());
-    spendingRanges.sort(Comparator.comparing(SpendingRange::getStartDate));
+  List<SpendingRange> getAverageSpendingDaily() {
+    return getAverageSpendingDaily(energyReadingRepository.earliest(),
+        energyReadingRepository.latest());
+  }
 
+  List<SpendingRange> getAverageSpendingDaily(Date startDate, Date endDate) {
+    var calendar = Calendar.getInstance();
+
+    calendar.setTime(startDate);
+    calendar.set(Calendar.HOUR, 0);
+    calendar.set(Calendar.MINUTE, 0);
+    calendar.set(Calendar.SECOND, 0);
+    calendar.set(Calendar.MILLISECOND, 0);
+    startDate = calendar.getTime();
+
+    calendar.setTime(endDate);
+    calendar.set(Calendar.HOUR, 0);
+    calendar.set(Calendar.MINUTE, 0);
+    calendar.set(Calendar.SECOND, 0);
+    calendar.set(Calendar.MILLISECOND, 0);
+    endDate = calendar.getTime();
+
+    return getAverageSpending(startDate, endDate, 1);
+  }
+
+  private SpendingRange getSpending(Date startDate, Date endDate) {
+    // instant representations
+    var requestStartInstant = startDate.toInstant();
+    var requestEndInstant = endDate.toInstant();
+
+    // get sublist of spending ranges
+    var allSpendingRanges = new ArrayList<>(spendingRangeRepository.getSpendingRanges());
+    allSpendingRanges.sort(Comparator.comparing(SpendingRange::getStartDate));
+    var sublist = getSpendingRanges(startDate, endDate, allSpendingRanges);
+    logger.debug("Sublist of spending ranges: " + sublist);
+
+    // handle first case
+    var first = sublist.get(0);
+
+    double amountOfFirst = getAmountOfFirst(first, requestStartInstant, requestEndInstant);
+    logger.debug("Amount of first: " + amountOfFirst);
+
+    var firstSpending = first.getUsage().multiply(BigDecimal.valueOf(amountOfFirst));
+    var totalSpending = firstSpending;
+    logger.debug("First spending: " + firstSpending);
+
+    if (sublist.size() == 1) {
+      return new SpendingRange(startDate, endDate, totalSpending);
+    }
+
+    // handle cases where sublist is not size 1
+    var middleSpending = getMiddleSpending(sublist);
+    logger.debug("Middle spending: " + middleSpending);
+
+    var last = sublist.get(sublist.size() - 1);
+
+    double amountOfLast = getAmountOfLast(requestStartInstant, requestEndInstant, last);
+    logger.debug("Amount of last: " + amountOfLast);
+
+    var lastSpending = last.getUsage().multiply(BigDecimal.valueOf(amountOfLast));
+    logger.debug("Last spending: " + lastSpending);
+
+    totalSpending = firstSpending.add(middleSpending).add(lastSpending);
+    logger.debug("Total spending: " + totalSpending);
+
+    return new SpendingRange(startDate, endDate, totalSpending);
+  }
+
+  private List<SpendingRange> getSpendingRanges(Date startDate, Date endDate,
+      ArrayList<SpendingRange> spendingRanges) {
     var indices = new HashSet<Integer>();
 
     for (int i = 0; i < spendingRanges.size(); i++) {
@@ -130,39 +198,72 @@ public class CalculatorService {
     var firstIndex = indices.stream().mapToInt(i -> i).min().orElseThrow();
     var lastIndex = indices.stream().mapToInt(i -> i).max().orElseThrow();
 
-    var sublist = spendingRanges.subList(firstIndex, lastIndex + 1);
-    logger.debug("Sublist of spending ranges: " + sublist);
+    return spendingRanges.subList(firstIndex, lastIndex + 1);
+  }
 
-    // First spending range
-    var first = sublist.get(0);
-    var portionFirst = first.getEndDate().getTime() - startDate.getTime();
-    var totalFirst = first.getEndDate().getTime() - first.getStartDate().getTime();
-    var amountOfFirst = ((double) portionFirst) / ((double) totalFirst);
-    logger.debug("Amount of first: " + amountOfFirst);
-    var firstSpending = first.getUsage().multiply(BigDecimal.valueOf(amountOfFirst));
-    logger.debug("First spending: " + firstSpending);
-
+  private BigDecimal getMiddleSpending(List<SpendingRange> sublist) {
     // Middle spending range(s)
     var middleSpending = BigDecimal.ZERO;
     for (int i = 1; i < sublist.size() - 1; i++) {
-      var spendingRange = sublist.get(i);
-      middleSpending = middleSpending.add(spendingRange.getUsage());
+      middleSpending = middleSpending.add(sublist.get(i).getUsage());
     }
-    logger.debug("Middle spending: " + middleSpending);
+    return middleSpending;
+  }
 
-    // Last spending range
-    var last = sublist.get(sublist.size() - 1);
-    var portionLast = endDate.getTime() - last.getStartDate().getTime();
+  private double getAmountOfLast(Instant requestStartInstant, Instant requestEndInstant,
+      SpendingRange last) {
+    // Will not end up as 0 as long as last.end is after last.start
+    long portionLast = 0;
+
+    var lastStartInstant = last.getStartDate().toInstant();
+    var lastEndInstant = last.getEndDate().toInstant();
     var totalLast = last.getEndDate().getTime() - last.getStartDate().getTime();
-    var amountOfLast = ((double) portionLast) / ((double) totalLast);
-    logger.debug("Amount of last: " + amountOfLast);
-    var lastSpending = last.getUsage().multiply(BigDecimal.valueOf(amountOfLast));
-    logger.debug("Last spending: " + lastSpending);
 
-    var totalSpending = firstSpending.add(middleSpending).add(lastSpending);
-    logger.debug("Total spending: " + totalSpending);
+    if (InstantComparison.isBeforeOrEqual(requestStartInstant, lastStartInstant)
+        && InstantComparison.isBeforeOrEqual(requestEndInstant, lastEndInstant)) {
+      // request starts before last range and ends within last range
+      portionLast = requestEndInstant.toEpochMilli() - last.getStartDate().getTime();
+    } else if (InstantComparison.isBeforeOrEqual(requestStartInstant, lastStartInstant)
+        && InstantComparison.isBeforeOrEqual(lastEndInstant, requestEndInstant)) {
+      // last range is fully within request
+      portionLast = totalLast;
+    }
 
-    return new SpendingRange(startDate, endDate, totalSpending);
+    return ((double) portionLast) / ((double) totalLast);
+  }
+
+  private double getAmountOfFirst(SpendingRange first, Instant requestStartInstant,
+      Instant requestEndInstant) {
+    // Will not end up as 0 as long as first.end is after first.start
+    long portionFirst = 0;
+
+    var firstStartInstant = first.getStartDate().toInstant();
+    var firstEndInstant = first.getEndDate().toInstant();
+
+    var totalFirst = first.getEndDate().getTime() - first.getStartDate().getTime();
+
+    if (InstantComparison.isBeforeOrEqual(firstStartInstant, requestStartInstant)
+        && InstantComparison.isBeforeOrEqual(requestEndInstant, firstEndInstant)) {
+      // Request is fully inside first range
+      portionFirst = requestEndInstant.toEpochMilli() - requestStartInstant.toEpochMilli();
+
+    } else if (InstantComparison.isBeforeOrEqual(firstStartInstant, requestStartInstant)
+        && InstantComparison.isBeforeOrEqual(firstEndInstant, requestEndInstant)) {
+      // Request starts after first range starts and ends after first range ends
+      portionFirst = first.getEndDate().getTime() - requestStartInstant.toEpochMilli();
+
+    } else if (InstantComparison.isBeforeOrEqual(requestStartInstant, firstStartInstant)
+        && InstantComparison.isBeforeOrEqual(requestEndInstant, firstEndInstant)) {
+      // Request starts before first range and ends within first range
+      portionFirst = requestEndInstant.toEpochMilli() - first.getStartDate().getTime();
+
+    } else if (InstantComparison.isBeforeOrEqual(requestStartInstant, firstStartInstant)
+        && InstantComparison.isBeforeOrEqual(firstEndInstant, requestEndInstant)) {
+      // Request starts before first and ends after first
+      portionFirst = totalFirst;
+    }
+
+    return ((double) portionFirst) / ((double) totalFirst);
   }
 
 }

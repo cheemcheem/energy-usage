@@ -1,8 +1,8 @@
-package com.cheemcheem.springprojects.energyusage.util.importers;
+package com.cheemcheem.springprojects.energyusage.util.importer;
 
 import com.cheemcheem.springprojects.energyusage.exception.InvalidDateException;
 import com.cheemcheem.springprojects.energyusage.model.EnergyReading;
-import com.cheemcheem.springprojects.energyusage.util.converters.DateConverter;
+import com.cheemcheem.springprojects.energyusage.util.converter.DateConverter;
 import com.opencsv.bean.AbstractBeanField;
 import com.opencsv.exceptions.CsvDataTypeMismatchException;
 import java.util.Date;

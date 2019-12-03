@@ -1,4 +1,4 @@
-package com.cheemcheem.springprojects.energyusage.util.converters;
+package com.cheemcheem.springprojects.energyusage.util.converter;
 
 import com.cheemcheem.springprojects.energyusage.exception.InvalidDateException;
 import java.text.DateFormat;

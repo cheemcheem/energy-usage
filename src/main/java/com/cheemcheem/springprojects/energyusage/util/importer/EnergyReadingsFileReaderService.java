@@ -1,4 +1,4 @@
-package com.cheemcheem.springprojects.energyusage.util.importers;
+package com.cheemcheem.springprojects.energyusage.util.importer;
 
 import com.cheemcheem.springprojects.energyusage.exception.EmptyRepositoryException;
 import com.cheemcheem.springprojects.energyusage.model.EnergyReading;

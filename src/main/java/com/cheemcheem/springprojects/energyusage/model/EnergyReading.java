@@ -1,7 +1,7 @@
 package com.cheemcheem.springprojects.energyusage.model;
 
-import com.cheemcheem.springprojects.energyusage.util.importers.CSVDateColumnConverter;
-import com.cheemcheem.springprojects.energyusage.util.importers.CSVReadingColumnConverter;
+import com.cheemcheem.springprojects.energyusage.util.importer.CSVDateColumnConverter;
+import com.cheemcheem.springprojects.energyusage.util.importer.CSVReadingColumnConverter;
 import com.opencsv.bean.CsvCustomBindByPosition;
 import java.math.BigDecimal;
 import java.util.Date;

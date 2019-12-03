@@ -2,7 +2,7 @@ package com.cheemcheem.springprojects.energyusage.controller;
 
 import com.cheemcheem.springprojects.energyusage.dto.SpendingRangeDTO;
 import com.cheemcheem.springprojects.energyusage.service.EnergyUsageService;
-import com.cheemcheem.springprojects.energyusage.util.converters.DateConverter;
+import com.cheemcheem.springprojects.energyusage.util.converter.DateConverter;
 import java.util.Date;
 import java.util.List;
 import lombok.NonNull;
@@ -71,10 +71,27 @@ public class EnergyUsageController {
 
   }
 
+  @GetMapping("/average/daily")
+  public ResponseEntity<List<SpendingRangeDTO>> getAverageSpendingDaily(
+      @RequestParam("startDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date startDate,
+      @RequestParam("endDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date endDate
+  ) {
+    logger.info("Get average daily spending from '" + startDate + "' to '" + endDate + "'.");
+    return ResponseEntity.ok(energyUsageService.getAverageSpendingBetweenDaily(startDate, endDate));
+
+  }
+
   @GetMapping("/average/all")
   public ResponseEntity<List<SpendingRangeDTO>> getAverageAll() {
-    logger.info("Get average spending over all days over " + 7 + "' day periods.");
+    logger.info("Get average spending over all days over '" + 7 + "' day periods.");
     return ResponseEntity.ok(energyUsageService.getAverageSpending(7));
+
+  }
+
+  @GetMapping("/average/daily/all")
+  public ResponseEntity<List<SpendingRangeDTO>> getAverageSpendingDailyAll() {
+    logger.info("Get average daily spending over all days.");
+    return ResponseEntity.ok(energyUsageService.getAverageSpendingBetweenDaily());
 
   }
 
