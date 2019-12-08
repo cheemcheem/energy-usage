@@ -36,7 +36,7 @@ public class EnergyUsageService {
   public SpendingRangeDTO getAllSpending() {
     logger.info("Get all spending.");
 
-    var spendingRange = this.calculatorService.generateForAllReadings();
+    var spendingRange = this.calculatorService.calculateAllSpending();
     return this.spendingRangeMapper.toDTO(spendingRange);
 
   }
@@ -44,7 +44,7 @@ public class EnergyUsageService {
   public SpendingRangeDTO getSpendingFrom(Date startDate) {
     logger.info("Get spending from '" + startDate + "'.");
 
-    var spendingRange = this.calculatorService.generateForReadingsAfter(startDate);
+    var spendingRange = this.calculatorService.calculateSpendingAfterDate(startDate);
     return this.spendingRangeMapper.toDTO(spendingRange);
 
   }
@@ -52,7 +52,7 @@ public class EnergyUsageService {
   public SpendingRangeDTO getSpendingTo(Date endDate) {
     logger.info("Get spending to '" + endDate + "'.");
 
-    var spendingRange = this.calculatorService.generateForReadingsUntil(endDate);
+    var spendingRange = this.calculatorService.calculateSpendingUntilDate(endDate);
     return this.spendingRangeMapper.toDTO(spendingRange);
 
   }
@@ -61,7 +61,7 @@ public class EnergyUsageService {
     logger.info("Get spending from '" + startDate + "' to '" + endDate + "'.");
 
     var spendingRange = this.calculatorService
-        .generateForReadingsBetween(startDate, endDate);
+        .calculateSpendingBetweenDates(startDate, endDate);
     return this.spendingRangeMapper.toDTO(spendingRange);
 
   }
@@ -70,10 +70,10 @@ public class EnergyUsageService {
     logger.info("Get average spending over all days over '" + dayGap
         + "' day periods.");
 
-    var averageSpendings = this.calculatorService
+    var averageSpending = this.calculatorService
         .getAverageSpending(dayGap);
 
-    return averageSpendings.stream()
+    return averageSpending.stream()
         .map(this.spendingRangeMapper::toDTO)
         .collect(Collectors.toList());
   }
@@ -82,10 +82,10 @@ public class EnergyUsageService {
     logger.info("Get average spending from '" + startDate + "' to '" + endDate + "' over '" + dayGap
         + "' day periods.");
 
-    var averageSpendings = this.calculatorService
+    var averageSpending = this.calculatorService
         .getAverageSpending(startDate, endDate, dayGap);
 
-    return averageSpendings.stream()
+    return averageSpending.stream()
         .map(this.spendingRangeMapper::toDTO)
         .collect(Collectors.toList());
 
@@ -94,9 +94,9 @@ public class EnergyUsageService {
   public List<SpendingRangeDTO> getAverageSpendingBetweenDaily() {
     logger.info("Get average daily spending over all days.");
 
-    var averageSpendings = this.calculatorService.getAverageSpendingDaily();
+    var averageDailySpending = this.calculatorService.getAverageDailySpending();
 
-    return averageSpendings.stream()
+    return averageDailySpending.stream()
         .map(this.spendingRangeMapper::toDTO)
         .collect(Collectors.toList());
   }
@@ -104,9 +104,52 @@ public class EnergyUsageService {
   public List<SpendingRangeDTO> getAverageSpendingBetweenDaily(Date startDate, Date endDate) {
     logger.info("Get average daily spending from '" + startDate + "' to '" + endDate + "'.");
 
-    var averageSpendings = this.calculatorService.getAverageSpendingDaily(startDate, endDate);
+    var averageDailySpending = this.calculatorService.getAverageDailySpending(startDate, endDate);
 
-    return averageSpendings.stream()
+    return averageDailySpending.stream()
+        .map(this.spendingRangeMapper::toDTO)
+        .collect(Collectors.toList());
+
+  }
+
+  public List<SpendingRangeDTO> getAverageSpendingBetweenWeekly() {
+    logger.info("Get average weekly spending over all days.");
+
+    var averageWeeklySpending = this.calculatorService.getAverageWeeklySpending();
+
+    return averageWeeklySpending.stream()
+        .map(this.spendingRangeMapper::toDTO)
+        .collect(Collectors.toList());
+  }
+
+  public List<SpendingRangeDTO> getAverageSpendingBetweenWeekly(Date startDate, Date endDate) {
+    logger.info("Get average weekly spending from '" + startDate + "' to '" + endDate + "'.");
+
+    var averageWeeklySpending = this.calculatorService.getAverageWeeklySpending(startDate, endDate);
+
+    return averageWeeklySpending.stream()
+        .map(this.spendingRangeMapper::toDTO)
+        .collect(Collectors.toList());
+
+  }
+
+  public List<SpendingRangeDTO> getAverageSpendingBetweenMonthly() {
+    logger.info("Get average monthly spending over all days.");
+
+    var averageMonthlySpending = this.calculatorService.getAverageMonthlySpending();
+
+    return averageMonthlySpending.stream()
+        .map(this.spendingRangeMapper::toDTO)
+        .collect(Collectors.toList());
+  }
+
+  public List<SpendingRangeDTO> getAverageSpendingBetweenMonthly(Date startDate, Date endDate) {
+    logger.info("Get average weekly monthly from '" + startDate + "' to '" + endDate + "'.");
+
+    var averageMonthlySpending = this.calculatorService
+        .getAverageMonthlySpending(startDate, endDate);
+
+    return averageMonthlySpending.stream()
         .map(this.spendingRangeMapper::toDTO)
         .collect(Collectors.toList());
 
