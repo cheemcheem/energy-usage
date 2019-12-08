@@ -1,10 +1,8 @@
 package com.cheemcheem.springprojects.energyusage.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 import com.cheemcheem.springprojects.energyusage.model.SpendingRange;
-import com.cheemcheem.springprojects.energyusage.repository.EnergyReadingRepository;
 import com.cheemcheem.springprojects.energyusage.repository.SpendingRangeRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -27,24 +25,21 @@ class CalculatorServiceTest {
   public static final long QUARTER_DAY = HALF_DAY / 2;
 
   @MockBean
-  private EnergyReadingRepository energyReadingRepository;
-  @MockBean
   private SpendingRangeRepository spendingRangeRepository;
 
   @BeforeEach
   void setup() {
-    var earliest = new Date(2 * HALF_DAY);
-    var latest = new Date(8 * HALF_DAY);
-    calculatorService = new CalculatorService(spendingRangeRepository, energyReadingRepository);
-
     // 1 -( £10 )-> 2, 2 -( £10 )-> 3, 3 -( £10 )-> 4
-    when(spendingRangeRepository.getSpendingRanges()).thenReturn(List.of(
-        new SpendingRange(new Date(DAY), new Date(2 * DAY), BigDecimal.TEN),
-        new SpendingRange(new Date(2 * DAY), new Date(3 * DAY), BigDecimal.TEN),
-        new SpendingRange(new Date(3 * DAY), new Date(4 * DAY), BigDecimal.TEN)
-    ));
-    when(energyReadingRepository.earliest()).thenReturn(earliest);
-    when(energyReadingRepository.latest()).thenReturn(latest);
+    this.spendingRangeRepository = new SpendingRangeRepository(
+        List.of(
+            new SpendingRange(new Date(DAY), new Date(2 * DAY), BigDecimal.TEN),
+            new SpendingRange(new Date(2 * DAY), new Date(3 * DAY), BigDecimal.TEN),
+            new SpendingRange(new Date(3 * DAY), new Date(4 * DAY), BigDecimal.TEN)
+        )
+    );
+
+    calculatorService = new CalculatorService(spendingRangeRepository);
+
   }
 
   @Nested
@@ -115,9 +110,12 @@ class CalculatorServiceTest {
     @Test
     void rangeIsWithinRequest() {
       // use DAY -> 4*DAY to keep earliest and latest dates same as others
-      when(spendingRangeRepository.getSpendingRanges()).thenReturn(List.of(
+      CalculatorServiceTest.this.spendingRangeRepository = new SpendingRangeRepository(List.of(
           new SpendingRange(new Date(DAY), new Date(4 * DAY), BigDecimal.valueOf(30.00))
       ));
+
+      CalculatorServiceTest.this.calculatorService = new CalculatorService(
+          CalculatorServiceTest.this.spendingRangeRepository);
 
       var requestStartDate = new Date(HALF_DAY);
       var requestEndDate = new Date(4 * DAY + HALF_DAY);

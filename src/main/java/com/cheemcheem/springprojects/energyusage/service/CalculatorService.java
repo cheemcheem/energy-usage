@@ -1,7 +1,6 @@
 package com.cheemcheem.springprojects.energyusage.service;
 
 import com.cheemcheem.springprojects.energyusage.model.SpendingRange;
-import com.cheemcheem.springprojects.energyusage.repository.EnergyReadingRepository;
 import com.cheemcheem.springprojects.energyusage.repository.SpendingRangeRepository;
 import com.cheemcheem.springprojects.energyusage.util.comparison.InstantComparison;
 import java.math.BigDecimal;
@@ -23,11 +22,9 @@ import org.springframework.stereotype.Service;
 /**
  * Performs calculations to determine spending between given dates.
  *
- * Uses {@link SpendingRangeRepository} for its spending ranges between dates. Uses {@link
- * EnergyReadingRepository} for its knowledge of earliest and latest dates.
+ * Uses {@link SpendingRangeRepository} for its spending ranges between dates.
  *
  * @see SpendingRangeRepository
- * @see EnergyReadingRepository
  */
 @Service
 @RequiredArgsConstructor
@@ -37,9 +34,6 @@ public class CalculatorService {
 
   @NonNull
   private final SpendingRangeRepository spendingRangeRepository;
-
-  @NonNull
-  private final EnergyReadingRepository energyReadingRepository;
 
   private static void resetToStartOfDay(Calendar calendar) {
     calendar.set(Calendar.AM_PM, Calendar.AM);
@@ -131,17 +125,17 @@ public class CalculatorService {
 
   SpendingRange calculateAllSpending() {
     logger.info("Get all spending.");
-    return getSpending(energyReadingRepository.earliest(), energyReadingRepository.latest());
+    return getSpending(spendingRangeRepository.earliest(), spendingRangeRepository.latest());
   }
 
   SpendingRange calculateSpendingAfterDate(Date startDate) {
     logger.info("Get spending from '" + startDate + "'.");
-    return getSpending(startDate, energyReadingRepository.latest());
+    return getSpending(startDate, spendingRangeRepository.latest());
   }
 
   SpendingRange calculateSpendingUntilDate(Date endDate) {
     logger.info("Get spending to '" + endDate + "'.");
-    return getSpending(energyReadingRepository.earliest(), endDate);
+    return getSpending(spendingRangeRepository.earliest(), endDate);
   }
 
   SpendingRange calculateSpendingBetweenDates(Date startDate, Date endDate) {
@@ -150,12 +144,12 @@ public class CalculatorService {
   }
 
   List<SpendingRange> getAverageDailySpending() {
-    return getAverageDailySpending(energyReadingRepository.earliest(),
-        energyReadingRepository.latest());
+    return getAverageDailySpending(spendingRangeRepository.earliest(),
+        spendingRangeRepository.latest());
   }
 
   List<SpendingRange> getAverageSpending(int dayGap) {
-    return getAverageSpending(energyReadingRepository.earliest(), energyReadingRepository.latest(),
+    return getAverageSpending(spendingRangeRepository.earliest(), spendingRangeRepository.latest(),
         dayGap);
 
   }
@@ -175,8 +169,8 @@ public class CalculatorService {
   }
 
   List<SpendingRange> getAverageWeeklySpending() {
-    return getAverageWeeklySpending(energyReadingRepository.earliest(),
-        energyReadingRepository.latest());
+    return getAverageWeeklySpending(spendingRangeRepository.earliest(),
+        spendingRangeRepository.latest());
   }
 
   List<SpendingRange> getAverageWeeklySpending(Date startDate, Date endDate) {
@@ -194,8 +188,8 @@ public class CalculatorService {
   }
 
   List<SpendingRange> getAverageMonthlySpending() {
-    return getAverageMonthlySpending(energyReadingRepository.earliest(),
-        energyReadingRepository.latest());
+    return getAverageMonthlySpending(spendingRangeRepository.earliest(),
+        spendingRangeRepository.latest());
   }
 
   List<SpendingRange> getAverageMonthlySpending(Date startDate, Date endDate) {
