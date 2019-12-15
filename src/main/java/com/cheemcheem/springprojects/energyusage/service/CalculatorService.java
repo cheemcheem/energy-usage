@@ -1,5 +1,8 @@
 package com.cheemcheem.springprojects.energyusage.service;
 
+import com.cheemcheem.springprojects.energyusage.exception.EmptyRepositoryException;
+import com.cheemcheem.springprojects.energyusage.exception.InternalStateException;
+import com.cheemcheem.springprojects.energyusage.exception.InvalidDateException;
 import com.cheemcheem.springprojects.energyusage.model.SpendingRange;
 import com.cheemcheem.springprojects.energyusage.repository.SpendingRangeRepository;
 import com.cheemcheem.springprojects.energyusage.util.comparison.InstantComparison;
@@ -125,36 +128,100 @@ public class CalculatorService {
 
   SpendingRange calculateAllSpending() {
     logger.info("Get all spending.");
-    return getSpending(spendingRangeRepository.earliest(), spendingRangeRepository.latest());
+    try {
+      return calculateSpending(spendingRangeRepository.earliest(),
+          spendingRangeRepository.latest());
+    } catch (EmptyRepositoryException e) {
+      logger.warn(e.getMessage());
+      return new SpendingRange(Date.from(Instant.EPOCH), Date.from(Instant.now()), BigDecimal.ZERO);
+    } catch (InvalidDateException e) {
+      logger.error("Should never have InvalidDateReception thrown here.", e);
+      throw new InternalStateException("Should never have InvalidDateReception thrown here.", e);
+    }
   }
 
   SpendingRange calculateSpendingAfterDate(Date startDate) {
     logger.info("Get spending from '" + startDate + "'.");
-    return getSpending(startDate, spendingRangeRepository.latest());
+    Date latest;
+
+    // handle usual case of repository being empty
+    try {
+      latest = spendingRangeRepository.latest();
+    } catch (EmptyRepositoryException e) {
+      logger.warn(e.getMessage());
+      return new SpendingRange(startDate, Date.from(Instant.now()), BigDecimal.ZERO);
+    }
+
+    // handle case where start date is after latest repository date
+    try {
+      return calculateSpending(startDate, latest);
+    } catch (InvalidDateException ignored) {
+      logger.warn("No spending from start date '" + startDate
+          + "' as that is after latest repository date '" + latest + "'. ");
+      return new SpendingRange(startDate, latest, BigDecimal.ZERO);
+    }
   }
 
   SpendingRange calculateSpendingUntilDate(Date endDate) {
     logger.info("Get spending to '" + endDate + "'.");
-    return getSpending(spendingRangeRepository.earliest(), endDate);
+    Date earliest;
+
+    // handle usual case of repository being empty
+    try {
+      earliest = spendingRangeRepository.earliest();
+    } catch (EmptyRepositoryException e) {
+      logger.warn(e.getMessage());
+      return new SpendingRange(Date.from(Instant.EPOCH), endDate, BigDecimal.ZERO);
+    }
+
+    // handle case where end date is before earliest repository date
+    try {
+      return calculateSpending(earliest, endDate);
+    } catch (InvalidDateException ignored) {
+      logger.warn("No spending before end date '" + endDate
+          + "' as that is before earliest repository date '" + earliest + "'. ");
+      return new SpendingRange(earliest, endDate, BigDecimal.ZERO);
+    }
+
   }
 
-  SpendingRange calculateSpendingBetweenDates(Date startDate, Date endDate) {
+  SpendingRange calculateSpendingBetweenDates(Date startDate, Date endDate)
+      throws InvalidDateException {
     logger.info("Get spending from '" + startDate + "' to '" + endDate + "'.");
-    return getSpending(startDate, endDate);
+    return calculateSpending(startDate, endDate);
   }
 
-  List<SpendingRange> getAverageDailySpending() {
-    return getAverageDailySpending(spendingRangeRepository.earliest(),
-        spendingRangeRepository.latest());
+  List<SpendingRange> calculateAverageDailySpending() {
+    try {
+      return calculateAverageDailySpending(spendingRangeRepository.earliest(),
+          spendingRangeRepository.latest());
+    } catch (EmptyRepositoryException e) {
+      logger.warn(e.getMessage());
+      return List.of();
+    } catch (InvalidDateException e) {
+      logger.error("Should never have InvalidDateReception thrown here.", e);
+      throw new InternalStateException("Should never have InvalidDateReception thrown here.", e);
+    }
   }
 
-  List<SpendingRange> getAverageSpending(int dayGap) {
-    return getAverageSpending(spendingRangeRepository.earliest(), spendingRangeRepository.latest(),
-        dayGap);
+  List<SpendingRange> calculateAverageSpending(int dayGap) {
+    try {
+      return calculateAverageSpending(spendingRangeRepository.earliest(),
+          spendingRangeRepository.latest(),
+          dayGap);
+    } catch (EmptyRepositoryException e) {
+      logger.warn(e.getMessage());
+      return List.of();
+    } catch (InvalidDateException e) {
+      logger.error("Should never have InvalidDateReception thrown here.", e);
+      throw new InternalStateException("Should never have InvalidDateReception thrown here.", e);
+    }
 
   }
 
-  List<SpendingRange> getAverageDailySpending(Date startDate, Date endDate) {
+  List<SpendingRange> calculateAverageDailySpending(Date startDate, Date endDate)
+      throws InvalidDateException {
+    logger.info("Get average daily spending from '" + startDate + "' to '" + endDate + "'.");
     var calendar = Calendar.getInstance();
 
     calendar.setTime(startDate);
@@ -165,15 +232,24 @@ public class CalculatorService {
     resetToStartOfDay(calendar);
     endDate = calendar.getTime();
 
-    return getAverageSpending(startDate, endDate, 1);
+    return calculateAverageSpending(startDate, endDate, 1);
   }
 
-  List<SpendingRange> getAverageWeeklySpending() {
-    return getAverageWeeklySpending(spendingRangeRepository.earliest(),
-        spendingRangeRepository.latest());
+  List<SpendingRange> calculateAverageWeeklySpending() {
+    try {
+      return calculateAverageWeeklySpending(spendingRangeRepository.earliest(),
+          spendingRangeRepository.latest());
+    } catch (EmptyRepositoryException e) {
+      logger.warn(e.getMessage());
+      return List.of();
+    } catch (InvalidDateException e) {
+      logger.error("Should never have InvalidDateReception thrown here.", e);
+      throw new InternalStateException("Should never have InvalidDateReception thrown here.", e);
+    }
   }
 
-  List<SpendingRange> getAverageWeeklySpending(Date startDate, Date endDate) {
+  List<SpendingRange> calculateAverageWeeklySpending(Date startDate, Date endDate)
+      throws InvalidDateException {
     var calendar = Calendar.getInstance();
 
     calendar.setTime(startDate);
@@ -184,15 +260,35 @@ public class CalculatorService {
     resetToStartOfDay(calendar);
     endDate = calendar.getTime();
 
-    return getAverageSpending(startDate, endDate, 7);
+    return calculateAverageSpending(startDate, endDate, 7);
   }
 
-  List<SpendingRange> getAverageMonthlySpending() {
-    return getAverageMonthlySpending(spendingRangeRepository.earliest(),
-        spendingRangeRepository.latest());
+  List<SpendingRange> calculateAverageMonthlySpending() {
+    try {
+      return calculateAverageMonthlySpending(spendingRangeRepository.earliest(),
+          spendingRangeRepository.latest());
+    } catch (EmptyRepositoryException e) {
+      logger.warn(e.getMessage());
+      return List.of();
+    } catch (InvalidDateException e) {
+      logger.error("Should never have InvalidDateReception thrown here.", e);
+      throw new InternalStateException("Should never have InvalidDateReception thrown here.", e);
+    }
   }
 
-  List<SpendingRange> getAverageMonthlySpending(Date startDate, Date endDate) {
+  List<SpendingRange> calculateAverageMonthlySpending(Date startDate, Date endDate)
+      throws InvalidDateException {
+    logger.info("Get average monthly spending from '" + startDate + "' to '" + endDate + ".");
+
+    // instant representations
+    var requestStartInstant = startDate.toInstant();
+    var requestEndInstant = endDate.toInstant();
+
+    if (requestStartInstant.isAfter(requestEndInstant)) {
+      logger.warn("Start date '" + startDate + "' occurs after end date '" + endDate + "'.");
+      throw InvalidDateException.wrongWayAround(startDate, endDate);
+    }
+
     var startCalendar = Calendar.getInstance();
 
     startCalendar.setTime(startDate);
@@ -203,10 +299,9 @@ public class CalculatorService {
     var endCalendar = Calendar.getInstance();
     endCalendar.setTime(endDate);
     resetToStartOfDay(endCalendar);
-    endCalendar.set(Calendar.MONTH, endCalendar.getActualMaximum(Calendar.MONTH));
+    endCalendar.add(Calendar.MONTH, 1);
+    endCalendar.set(Calendar.DAY_OF_MONTH, 1);
     endDate = endCalendar.getTime();
-
-    logger.info("Get average monthly spending from '" + startDate + "' to '" + endDate + ".");
 
     spendingRangeRepository.getSpendingRanges().stream()
         .sorted(Comparator.comparing(SpendingRange::getStartDate))
@@ -219,7 +314,7 @@ public class CalculatorService {
     // Exceptional case: date range too small for gap
     if (endCalendar.get(Calendar.MONTH) == startCalendar.get(Calendar.MONTH)
         && endCalendar.get(Calendar.YEAR) == startCalendar.get(Calendar.YEAR)) {
-      var spendingRange = getSpending(startDate, endDate);
+      var spendingRange = calculateSpending(startDate, endDate);
       var averageSpending = spendingRange.getUsage()
           .divide(BigDecimal.valueOf(endCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)),
               RoundingMode.HALF_UP);
@@ -241,7 +336,7 @@ public class CalculatorService {
       var newEndDate = lastEndCalendar.getTime();
 
       // Get total spending between two dates that are day gap days apart
-      var totalSpending = getSpending(lastEndDate, newEndDate);
+      var totalSpending = calculateSpending(lastEndDate, newEndDate);
 
       // Average the total spending between those dates by dividing by day gap
 
@@ -267,13 +362,23 @@ public class CalculatorService {
 
   }
 
-  List<SpendingRange> getAverageSpending(Date startDate, Date endDate, int dayGap) {
+  List<SpendingRange> calculateAverageSpending(Date startDate, Date endDate, int dayGap)
+      throws InvalidDateException {
     logger.info("Get average spending from '" + startDate + "' to '" + endDate + "' over '" + dayGap
         + "' day periods.");
     spendingRangeRepository.getSpendingRanges().stream()
         .sorted(Comparator.comparing(SpendingRange::getStartDate))
         .map(SpendingRange::toString)
         .forEach(logger::debug);
+
+    // instant representations
+    var requestStartInstant = startDate.toInstant();
+    var requestEndInstant = endDate.toInstant();
+
+    if (requestStartInstant.isAfter(requestEndInstant)) {
+      logger.warn("Start date '" + startDate + "' occurs after end date '" + endDate + "'.");
+      throw InvalidDateException.wrongWayAround(startDate, endDate);
+    }
 
     BiFunction<Date, Date, Long> daysBetween =
         (start, end) -> ChronoUnit.DAYS.between(start.toInstant(), end.toInstant());
@@ -296,7 +401,7 @@ public class CalculatorService {
       var newEndDate = calendar.getTime();
 
       // Get total spending between two dates that are day gap days apart
-      var totalSpending = getSpending(lastEndDate, newEndDate);
+      var totalSpending = calculateSpending(lastEndDate, newEndDate);
 
       // Average the total spending between those dates by dividing by day gap
       var averageReading = totalSpending.getUsage()
@@ -313,20 +418,32 @@ public class CalculatorService {
       lastEndDate = newEndDate;
     }
 
+    logger.debug("averageSpendingList = " + averageSpendingList);
+
     return averageSpendingList;
 
   }
 
-  private SpendingRange getSpending(Date startDate, Date endDate) {
+  private SpendingRange calculateSpending(Date startDate, Date endDate)
+      throws InvalidDateException {
     // instant representations
     var requestStartInstant = startDate.toInstant();
     var requestEndInstant = endDate.toInstant();
 
+    if (requestStartInstant.isAfter(requestEndInstant)) {
+      logger.warn("Start date '" + startDate + "' occurs after end date '" + endDate + "'.");
+      throw InvalidDateException.wrongWayAround(startDate, endDate);
+    }
     // get sublist of spending ranges
     var sublist = new ArrayList<>(spendingRangeRepository.getBetweenDates(startDate, endDate));
     sublist.sort(Comparator.comparing(SpendingRange::getStartDate));
     logger.debug(
-        "Sublist of spending ranges between " + startDate + " and " + endDate + ": " + sublist);
+        "Sublist of spending ranges between '" + startDate + "' and '" + endDate + "': " + sublist);
+
+    if (sublist.size() == 0) {
+      logger.debug("No spending ranges found.");
+      return new SpendingRange(startDate, endDate, BigDecimal.ZERO);
+    }
 
     // handle first case
     var firstSpending = firstSpending(requestStartInstant, requestEndInstant, sublist.get(0));

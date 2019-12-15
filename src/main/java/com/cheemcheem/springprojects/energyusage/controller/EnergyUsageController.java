@@ -1,6 +1,7 @@
 package com.cheemcheem.springprojects.energyusage.controller;
 
 import com.cheemcheem.springprojects.energyusage.dto.SpendingRangeDTO;
+import com.cheemcheem.springprojects.energyusage.exception.InvalidDateException;
 import com.cheemcheem.springprojects.energyusage.service.EnergyUsageService;
 import com.cheemcheem.springprojects.energyusage.util.converter.DateConverter;
 import java.util.Date;
@@ -56,7 +57,12 @@ public class EnergyUsageController {
       @RequestParam("endDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date endDate
   ) {
     logger.info("Get spending from '" + startDate + "' to '" + endDate + "'.");
-    return ResponseEntity.ok(energyUsageService.getSpendingBetween(startDate, endDate));
+    try {
+      return ResponseEntity.ok(energyUsageService.getSpendingBetween(startDate, endDate));
+    } catch (InvalidDateException e) {
+      logger.warn(e.getMessage());
+      return ResponseEntity.badRequest().build();
+    }
 
   }
 
@@ -67,7 +73,12 @@ public class EnergyUsageController {
   ) {
     logger.info("Get average spending from '" + startDate + "' to '" + endDate + "' over '" + 7
         + "' day periods.");
-    return ResponseEntity.ok(energyUsageService.getAverageSpending(startDate, endDate, 7));
+    try {
+      return ResponseEntity.ok(energyUsageService.getAverageSpending(startDate, endDate, 7));
+    } catch (InvalidDateException e) {
+      logger.warn(e.getMessage());
+      return ResponseEntity.badRequest().build();
+    }
 
   }
 
@@ -85,7 +96,13 @@ public class EnergyUsageController {
       @RequestParam("endDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date endDate
   ) {
     logger.info("Get average daily spending from '" + startDate + "' to '" + endDate + "'.");
-    return ResponseEntity.ok(energyUsageService.getAverageSpendingBetweenDaily(startDate, endDate));
+    try {
+      return ResponseEntity
+          .ok(energyUsageService.getAverageSpendingBetweenDaily(startDate, endDate));
+    } catch (InvalidDateException e) {
+      logger.warn(e.getMessage());
+      return ResponseEntity.badRequest().build();
+    }
 
   }
 
@@ -102,8 +119,13 @@ public class EnergyUsageController {
       @RequestParam("endDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date endDate
   ) {
     logger.info("Get average weekly spending from '" + startDate + "' to '" + endDate + "'.");
-    return ResponseEntity
-        .ok(energyUsageService.getAverageSpendingBetweenWeekly(startDate, endDate));
+    try {
+      return ResponseEntity
+          .ok(energyUsageService.getAverageSpendingBetweenWeekly(startDate, endDate));
+    } catch (InvalidDateException e) {
+      logger.warn(e.getMessage());
+      return ResponseEntity.badRequest().build();
+    }
 
   }
 
@@ -119,8 +141,13 @@ public class EnergyUsageController {
       @RequestParam("endDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date endDate
   ) {
     logger.info("Get average monthly spending from '" + startDate + "' to '" + endDate + "'.");
-    return ResponseEntity
-        .ok(energyUsageService.getAverageSpendingBetweenMonthly(startDate, endDate));
+    try {
+      return ResponseEntity
+          .ok(energyUsageService.getAverageSpendingBetweenMonthly(startDate, endDate));
+    } catch (InvalidDateException e) {
+      logger.warn(e.getMessage());
+      return ResponseEntity.badRequest().build();
+    }
 
   }
 

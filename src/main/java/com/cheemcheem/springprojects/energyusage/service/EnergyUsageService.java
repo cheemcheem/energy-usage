@@ -1,6 +1,7 @@
 package com.cheemcheem.springprojects.energyusage.service;
 
 import com.cheemcheem.springprojects.energyusage.dto.SpendingRangeDTO;
+import com.cheemcheem.springprojects.energyusage.exception.InvalidDateException;
 import com.cheemcheem.springprojects.energyusage.util.mapper.SpendingRangeMapper;
 import java.util.Date;
 import java.util.List;
@@ -57,7 +58,8 @@ public class EnergyUsageService {
 
   }
 
-  public SpendingRangeDTO getSpendingBetween(Date startDate, Date endDate) {
+  public SpendingRangeDTO getSpendingBetween(Date startDate, Date endDate)
+      throws InvalidDateException {
     logger.info("Get spending from '" + startDate + "' to '" + endDate + "'.");
 
     var spendingRange = this.calculatorService
@@ -71,19 +73,20 @@ public class EnergyUsageService {
         + "' day periods.");
 
     var averageSpending = this.calculatorService
-        .getAverageSpending(dayGap);
+        .calculateAverageSpending(dayGap);
 
     return averageSpending.stream()
         .map(this.spendingRangeMapper::toDTO)
         .collect(Collectors.toList());
   }
 
-  public List<SpendingRangeDTO> getAverageSpending(Date startDate, Date endDate, int dayGap) {
+  public List<SpendingRangeDTO> getAverageSpending(Date startDate, Date endDate, int dayGap)
+      throws InvalidDateException {
     logger.info("Get average spending from '" + startDate + "' to '" + endDate + "' over '" + dayGap
         + "' day periods.");
 
     var averageSpending = this.calculatorService
-        .getAverageSpending(startDate, endDate, dayGap);
+        .calculateAverageSpending(startDate, endDate, dayGap);
 
     return averageSpending.stream()
         .map(this.spendingRangeMapper::toDTO)
@@ -94,17 +97,19 @@ public class EnergyUsageService {
   public List<SpendingRangeDTO> getAverageSpendingBetweenDaily() {
     logger.info("Get average daily spending over all days.");
 
-    var averageDailySpending = this.calculatorService.getAverageDailySpending();
+    var averageDailySpending = this.calculatorService.calculateAverageDailySpending();
 
     return averageDailySpending.stream()
         .map(this.spendingRangeMapper::toDTO)
         .collect(Collectors.toList());
   }
 
-  public List<SpendingRangeDTO> getAverageSpendingBetweenDaily(Date startDate, Date endDate) {
+  public List<SpendingRangeDTO> getAverageSpendingBetweenDaily(Date startDate, Date endDate)
+      throws InvalidDateException {
     logger.info("Get average daily spending from '" + startDate + "' to '" + endDate + "'.");
 
-    var averageDailySpending = this.calculatorService.getAverageDailySpending(startDate, endDate);
+    var averageDailySpending = this.calculatorService
+        .calculateAverageDailySpending(startDate, endDate);
 
     return averageDailySpending.stream()
         .map(this.spendingRangeMapper::toDTO)
@@ -115,17 +120,19 @@ public class EnergyUsageService {
   public List<SpendingRangeDTO> getAverageSpendingBetweenWeekly() {
     logger.info("Get average weekly spending over all days.");
 
-    var averageWeeklySpending = this.calculatorService.getAverageWeeklySpending();
+    var averageWeeklySpending = this.calculatorService.calculateAverageWeeklySpending();
 
     return averageWeeklySpending.stream()
         .map(this.spendingRangeMapper::toDTO)
         .collect(Collectors.toList());
   }
 
-  public List<SpendingRangeDTO> getAverageSpendingBetweenWeekly(Date startDate, Date endDate) {
+  public List<SpendingRangeDTO> getAverageSpendingBetweenWeekly(Date startDate, Date endDate)
+      throws InvalidDateException {
     logger.info("Get average weekly spending from '" + startDate + "' to '" + endDate + "'.");
 
-    var averageWeeklySpending = this.calculatorService.getAverageWeeklySpending(startDate, endDate);
+    var averageWeeklySpending = this.calculatorService
+        .calculateAverageWeeklySpending(startDate, endDate);
 
     return averageWeeklySpending.stream()
         .map(this.spendingRangeMapper::toDTO)
@@ -136,18 +143,19 @@ public class EnergyUsageService {
   public List<SpendingRangeDTO> getAverageSpendingBetweenMonthly() {
     logger.info("Get average monthly spending over all days.");
 
-    var averageMonthlySpending = this.calculatorService.getAverageMonthlySpending();
+    var averageMonthlySpending = this.calculatorService.calculateAverageMonthlySpending();
 
     return averageMonthlySpending.stream()
         .map(this.spendingRangeMapper::toDTO)
         .collect(Collectors.toList());
   }
 
-  public List<SpendingRangeDTO> getAverageSpendingBetweenMonthly(Date startDate, Date endDate) {
+  public List<SpendingRangeDTO> getAverageSpendingBetweenMonthly(Date startDate, Date endDate)
+      throws InvalidDateException {
     logger.info("Get average weekly monthly from '" + startDate + "' to '" + endDate + "'.");
 
     var averageMonthlySpending = this.calculatorService
-        .getAverageMonthlySpending(startDate, endDate);
+        .calculateAverageMonthlySpending(startDate, endDate);
 
     return averageMonthlySpending.stream()
         .map(this.spendingRangeMapper::toDTO)

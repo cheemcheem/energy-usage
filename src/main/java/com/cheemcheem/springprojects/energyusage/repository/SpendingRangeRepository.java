@@ -27,14 +27,14 @@ public class SpendingRangeRepository {
         .collect(Collectors.toList());
   }
 
-  public Date earliest() {
+  public Date earliest() throws EmptyRepositoryException {
     return this.spendingRanges.stream()
         .map(SpendingRange::getStartDate)
         .min(Date::compareTo)
         .orElseThrow(throwBecauseNothingInStream());
   }
 
-  public Date latest() {
+  public Date latest() throws EmptyRepositoryException {
     return this.spendingRanges.stream()
         .map(SpendingRange::getEndDate)
         .max(Date::compareTo)
@@ -43,7 +43,7 @@ public class SpendingRangeRepository {
 
   private Supplier<EmptyRepositoryException> throwBecauseNothingInStream() {
     return () -> new EmptyRepositoryException(
-        "Cannot calculate spending over range because no readings found in that range."
+        "No readings in repository."
     );
   }
 
