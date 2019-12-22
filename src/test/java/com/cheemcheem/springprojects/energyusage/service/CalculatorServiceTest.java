@@ -9,10 +9,10 @@ import com.cheemcheem.springprojects.energyusage.model.SpendingRange;
 import com.cheemcheem.springprojects.energyusage.repository.SpendingRangeRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,8 +35,8 @@ class CalculatorServiceTest {
   private final CalculatorService calculatorService = new CalculatorService(
       spendingRangeRepository);
 
-  private static Date getGmtDate(long date) {
-    return new Date(LocalDate.ofInstant(new Date(date).toInstant(), ZoneId.of("GMT")).toEpochDay());
+  private static LocalDateTime toLocalDateTime(long day) {
+    return LocalDateTime.ofInstant(Instant.ofEpochMilli(day), ZoneOffset.UTC.normalized());
   }
 
   @BeforeEach
@@ -44,9 +44,12 @@ class CalculatorServiceTest {
     // 1 -( £10 )-> 2, 2 -( £10 )-> 3, 3 -( £10 )-> 4
     spendingRanges.clear();
     spendingRanges.addAll(List.of(
-        new SpendingRange(new Date(DAY), new Date(2 * DAY), BigDecimal.TEN),
-        new SpendingRange(new Date(2 * DAY), new Date(3 * DAY), BigDecimal.TEN),
-        new SpendingRange(new Date(3 * DAY), new Date(4 * DAY), BigDecimal.TEN)
+        new SpendingRange(
+            toLocalDateTime(DAY), toLocalDateTime(2 * DAY), BigDecimal.TEN),
+        new SpendingRange(
+            toLocalDateTime(2 * DAY), toLocalDateTime(3 * DAY), BigDecimal.TEN),
+        new SpendingRange(
+            toLocalDateTime(3 * DAY), toLocalDateTime(4 * DAY), BigDecimal.TEN)
     ));
 
   }
@@ -62,8 +65,8 @@ class CalculatorServiceTest {
 
     @Test
     void requestIsWithinRange() throws InvalidDateException {
-      var requestStartDate = new Date(DAY + QUARTER_DAY);
-      var requestEndDate = new Date(DAY + HALF_DAY);
+      var requestStartDate = toLocalDateTime(DAY + QUARTER_DAY);
+      var requestEndDate = toLocalDateTime(DAY + HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(2.50).setScale(2, RoundingMode.HALF_UP);
 
       var result = calculatorService
@@ -76,8 +79,8 @@ class CalculatorServiceTest {
 
     @Test
     void requestOver2Ranges() throws InvalidDateException {
-      var requestStartDate = new Date(2 * DAY - QUARTER_DAY);
-      var requestEndDate = new Date(2 * DAY + QUARTER_DAY);
+      var requestStartDate = toLocalDateTime(2 * DAY - QUARTER_DAY);
+      var requestEndDate = toLocalDateTime(2 * DAY + QUARTER_DAY);
       var expectedUsage = BigDecimal.valueOf(5.00).setScale(2, RoundingMode.HALF_UP);
 
       var result = calculatorService
@@ -90,8 +93,8 @@ class CalculatorServiceTest {
 
     @Test
     void requestStartsBeforeFirstRangeEndsInsideFirstRange() throws InvalidDateException {
-      var requestStartDate = new Date(HALF_DAY);
-      var requestEndDate = new Date(DAY + HALF_DAY);
+      var requestStartDate = toLocalDateTime(HALF_DAY);
+      var requestEndDate = toLocalDateTime(DAY + HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(5.00).setScale(2, RoundingMode.HALF_UP);
 
       var result = calculatorService
@@ -104,8 +107,8 @@ class CalculatorServiceTest {
 
     @Test
     void requestStartsBeforeFirstRangeEndsInsideSecondRange() throws InvalidDateException {
-      var requestStartDate = new Date(HALF_DAY);
-      var requestEndDate = new Date(2 * DAY + HALF_DAY);
+      var requestStartDate = toLocalDateTime(HALF_DAY);
+      var requestEndDate = toLocalDateTime(2 * DAY + HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(15.00).setScale(2, RoundingMode.HALF_UP);
 
       var result = calculatorService
@@ -121,11 +124,12 @@ class CalculatorServiceTest {
       // use DAY -> 4*DAY to keep earliest and latest dates same as others
       spendingRanges.clear();
       spendingRanges.addAll(List.of(
-          new SpendingRange(new Date(DAY), new Date(4 * DAY), BigDecimal.valueOf(30.00))
+          new SpendingRange(
+              toLocalDateTime(DAY), toLocalDateTime(4 * DAY), BigDecimal.valueOf(30.00))
       ));
 
-      var requestStartDate = new Date(HALF_DAY);
-      var requestEndDate = new Date(4 * DAY + HALF_DAY);
+      var requestStartDate = toLocalDateTime(HALF_DAY);
+      var requestEndDate = toLocalDateTime(4 * DAY + HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(30.00).setScale(2, RoundingMode.HALF_UP);
 
       var result = calculatorService
@@ -139,8 +143,8 @@ class CalculatorServiceTest {
 
     @Test
     void rangesAreWithinRequest() throws InvalidDateException {
-      var requestStartDate = new Date(HALF_DAY);
-      var requestEndDate = new Date(4 * DAY + HALF_DAY);
+      var requestStartDate = toLocalDateTime(HALF_DAY);
+      var requestEndDate = toLocalDateTime(4 * DAY + HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(30.00).setScale(2, RoundingMode.HALF_UP);
 
       var result = calculatorService
@@ -153,8 +157,8 @@ class CalculatorServiceTest {
 
     @Test
     void requestEndsAfterLastRange() throws InvalidDateException {
-      var requestStartDate = new Date(3 * DAY + HALF_DAY);
-      var requestEndDate = new Date(4 * DAY + HALF_DAY);
+      var requestStartDate = toLocalDateTime(3 * DAY + HALF_DAY);
+      var requestEndDate = toLocalDateTime(4 * DAY + HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(5.00).setScale(2, RoundingMode.HALF_UP);
 
       var result = calculatorService
@@ -167,8 +171,8 @@ class CalculatorServiceTest {
 
     @Test
     void knowsThatDatesShouldBeCorrectWayAround() {
-      var startDate = new Date(2);
-      var endDate = new Date(1);
+      var startDate = toLocalDateTime(2);
+      var endDate = toLocalDateTime(1);
 
       assertThrows(InvalidDateException.class,
           () -> calculatorService.calculateSpendingBetweenDates(startDate, endDate));
@@ -176,8 +180,8 @@ class CalculatorServiceTest {
 
     @Test
     void requestStartsAndEndsAfterEndDate() {
-      var requestStartDate = new Date(4 * DAY + HALF_DAY);
-      var requestEndDate = new Date(45 * DAY + HALF_DAY);
+      var requestStartDate = toLocalDateTime(4 * DAY + HALF_DAY);
+      var requestEndDate = toLocalDateTime(45 * DAY + HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(0.00).setScale(2, RoundingMode.HALF_UP);
 
       AtomicReference<SpendingRange> resultHolder = new AtomicReference<>();
@@ -196,7 +200,8 @@ class CalculatorServiceTest {
       spendingRanges.clear();
       assertDoesNotThrow(calculatorService::calculateAllSpending);
       assertDoesNotThrow(
-          () -> calculatorService.calculateSpendingBetweenDates(new Date(1), new Date(2)));
+          () -> calculatorService.calculateSpendingBetweenDates(
+              toLocalDateTime(1), toLocalDateTime(2)));
     }
 
   }
@@ -206,8 +211,8 @@ class CalculatorServiceTest {
 
     @Test
     void requestIsWithinRangeStartingWhenFirstRangeStarts() throws InvalidDateException {
-      var requestStartDate = new Date(DAY);
-      var requestEndDate = new Date(DAY + QUARTER_DAY);
+      var requestStartDate = toLocalDateTime(DAY);
+      var requestEndDate = toLocalDateTime(DAY + QUARTER_DAY);
       var expectedUsage = BigDecimal.valueOf(2.50).setScale(2, RoundingMode.HALF_UP);
 
       var result = calculatorService
@@ -220,8 +225,8 @@ class CalculatorServiceTest {
 
     @Test
     void requestOver2RangesStartingWhenFirstRangeStarts() throws InvalidDateException {
-      var requestStartDate = new Date(DAY);
-      var requestEndDate = new Date(2 * DAY + QUARTER_DAY);
+      var requestStartDate = toLocalDateTime(DAY);
+      var requestEndDate = toLocalDateTime(2 * DAY + QUARTER_DAY);
       var expectedUsage = BigDecimal.valueOf(12.50).setScale(2, RoundingMode.HALF_UP);
 
       var result = calculatorService
@@ -234,8 +239,8 @@ class CalculatorServiceTest {
 
     @Test
     void requestStartsWhenSecondLastRangeStartsAndEndsAfterLastRange() throws InvalidDateException {
-      var requestStartDate = new Date(3 * DAY);
-      var requestEndDate = new Date(4 * DAY + HALF_DAY);
+      var requestStartDate = toLocalDateTime(3 * DAY);
+      var requestEndDate = toLocalDateTime(4 * DAY + HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(10).setScale(2, RoundingMode.HALF_UP);
 
       var result = calculatorService
@@ -253,8 +258,8 @@ class CalculatorServiceTest {
 
     @Test
     void requestIsWithinRangeEndingWhenRangeEnds() throws InvalidDateException {
-      var requestStartDate = new Date(DAY + QUARTER_DAY);
-      var requestEndDate = new Date(2 * DAY);
+      var requestStartDate = toLocalDateTime(DAY + QUARTER_DAY);
+      var requestEndDate = toLocalDateTime(2 * DAY);
       var expectedUsage = BigDecimal.valueOf(7.50).setScale(2, RoundingMode.HALF_UP);
 
       var result = calculatorService
@@ -267,8 +272,8 @@ class CalculatorServiceTest {
 
     @Test
     void requestOver2RangesEndingWhenSecondRangeEnds() throws InvalidDateException {
-      var requestStartDate = new Date(2 * DAY - QUARTER_DAY);
-      var requestEndDate = new Date(3 * DAY);
+      var requestStartDate = toLocalDateTime(2 * DAY - QUARTER_DAY);
+      var requestEndDate = toLocalDateTime(3 * DAY);
       var expectedUsage = BigDecimal.valueOf(12.50).setScale(2, RoundingMode.HALF_UP);
 
       var result = calculatorService
@@ -281,8 +286,8 @@ class CalculatorServiceTest {
 
     @Test
     void requestStartsBeforeFirstRangeEndsWhenFirstRangeEnds() throws InvalidDateException {
-      var requestStartDate = new Date(HALF_DAY);
-      var requestEndDate = new Date(2 * DAY);
+      var requestStartDate = toLocalDateTime(HALF_DAY);
+      var requestEndDate = toLocalDateTime(2 * DAY);
       var expectedUsage = BigDecimal.valueOf(10.00).setScale(2, RoundingMode.HALF_UP);
 
       var result = calculatorService
@@ -295,8 +300,8 @@ class CalculatorServiceTest {
 
     @Test
     void requestStartsBeforeFirstRangeEndsWhenSecondRangeEnds() throws InvalidDateException {
-      var requestStartDate = new Date(HALF_DAY);
-      var requestEndDate = new Date(3 * DAY);
+      var requestStartDate = toLocalDateTime(HALF_DAY);
+      var requestEndDate = toLocalDateTime(3 * DAY);
       var expectedUsage = BigDecimal.valueOf(20.00).setScale(2, RoundingMode.HALF_UP);
 
       var result = calculatorService
@@ -325,8 +330,8 @@ class CalculatorServiceTest {
 
     @Test
     void dailyAverageOver1Day() throws InvalidDateException {
-      var requestStartDate = new Date(DAY);
-      var requestEndDate = new Date(2 * DAY);
+      var requestStartDate = toLocalDateTime(DAY);
+      var requestEndDate = toLocalDateTime(2 * DAY);
       var expectedUsage = BigDecimal.valueOf(10.00).setScale(2, RoundingMode.HALF_UP);
 
       var result = calculatorService
@@ -358,8 +363,8 @@ class CalculatorServiceTest {
 
     @Test
     void knowsThatDatesShouldBeCorrectWayAround() {
-      var startDate = new Date(2 * DAY);
-      var endDate = new Date(DAY);
+      var startDate = toLocalDateTime(2 * DAY);
+      var endDate = toLocalDateTime(DAY);
 
       assertThrows(InvalidDateException.class,
           () -> calculatorService.calculateAverageDailySpending(startDate, endDate));
@@ -371,8 +376,8 @@ class CalculatorServiceTest {
 
     @Test
     void knowsThatDatesShouldBeCorrectWayAround() {
-      var startDate = new Date(8 * DAY);
-      var endDate = new Date(DAY);
+      var startDate = toLocalDateTime(8 * DAY);
+      var endDate = toLocalDateTime(DAY);
 
       assertThrows(InvalidDateException.class,
           () -> calculatorService.calculateAverageWeeklySpending(startDate, endDate));
@@ -384,11 +389,37 @@ class CalculatorServiceTest {
 
     @Test
     void knowsThatDatesShouldBeCorrectWayAround() {
-      var startDate = new Date(40 * DAY);
-      var endDate = new Date(DAY);
+      var startDate = toLocalDateTime(40 * DAY);
+      var endDate = toLocalDateTime(DAY);
 
       assertThrows(InvalidDateException.class,
           () -> calculatorService.calculateAverageMonthlySpending(startDate, endDate));
+    }
+
+    @Test
+    void worksOverMultipleYears() {
+      var startRange = LocalDateTime.of(1970, 12, 22, 0, 0, 0, 0);
+      var endRange = LocalDateTime.of(1971, 1, 21, 0, 0, 0, 0);
+      var valRange = BigDecimal.valueOf(90);
+      spendingRanges.clear();
+      spendingRanges.addAll(List.of(
+          new SpendingRange(startRange, endRange, valRange)
+      ));
+
+      var startOne = LocalDateTime.of(1970, 12, 22, 0, 0, 0, 0);
+      var endOne = LocalDateTime.of(1970, 12, 31, 23, 59, 59, 999999999);
+      var valOne = BigDecimal.valueOf(3).setScale(2, RoundingMode.HALF_UP);
+
+      var startTwo = LocalDateTime.of(1971, 1, 1, 0, 0, 0, 0);
+      var endTwo = LocalDateTime.of(1971, 1, 21, 0, 0, 0, 0);
+      var valTwo = BigDecimal.valueOf(3).setScale(2, RoundingMode.HALF_UP);
+
+      var expectedMonthOne = new SpendingRange(startOne, endOne, valOne);
+      var expectedMonthTwo = new SpendingRange(startTwo, endTwo, valTwo);
+      var results = calculatorService.calculateAverageMonthlySpending();
+
+      assertThat(results).containsExactlyInAnyOrder(expectedMonthOne, expectedMonthTwo);
+
     }
   }
 

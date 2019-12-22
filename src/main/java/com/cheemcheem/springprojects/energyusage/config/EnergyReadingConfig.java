@@ -2,7 +2,7 @@ package com.cheemcheem.springprojects.energyusage.config;
 
 import com.cheemcheem.springprojects.energyusage.exception.EmptyRepositoryException;
 import com.cheemcheem.springprojects.energyusage.model.SpendingRange;
-import com.cheemcheem.springprojects.energyusage.util.importer.EnergyReadingsFileReaderService;
+import com.cheemcheem.springprojects.energyusage.util.importer.EnergyReadingsFileReader;
 import com.cheemcheem.springprojects.energyusage.util.mapper.SpendingRangeMapper;
 import java.io.IOException;
 import java.util.Collection;
@@ -21,7 +21,7 @@ public class EnergyReadingConfig {
 
   @Bean
   public Collection<SpendingRange> readCSVRange() throws IOException, EmptyRepositoryException {
-    var csvBeanCreator = new EnergyReadingsFileReaderService(this.csvPath);
+    var csvBeanCreator = new EnergyReadingsFileReader(this.csvPath);
     csvBeanCreator.initialise();
     return new HashSet<>(csvBeanCreator.getEnergyReadingsRange());
   }

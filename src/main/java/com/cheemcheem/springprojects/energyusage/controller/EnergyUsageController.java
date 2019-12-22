@@ -3,8 +3,8 @@ package com.cheemcheem.springprojects.energyusage.controller;
 import com.cheemcheem.springprojects.energyusage.dto.SpendingRangeDTO;
 import com.cheemcheem.springprojects.energyusage.exception.InvalidDateException;
 import com.cheemcheem.springprojects.energyusage.service.EnergyUsageService;
-import com.cheemcheem.springprojects.energyusage.util.converter.DateConverter;
-import java.util.Date;
+import com.cheemcheem.springprojects.energyusage.util.converter.LocalDateTimeConverter;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class EnergyUsageController {
 
   @GetMapping("/spending/from")
   public ResponseEntity<SpendingRangeDTO> getSpendingFrom(
-      @RequestParam("startDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date startDate
+      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime startDate
   ) {
     logger.info("Get spending from '" + startDate + "'.");
     return ResponseEntity.ok(energyUsageService.getSpendingFrom(startDate));
@@ -43,7 +43,7 @@ public class EnergyUsageController {
 
   @GetMapping("/spending/to")
   public ResponseEntity<SpendingRangeDTO> getSpendingTo(
-      @RequestParam("endDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date endDate
+      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime endDate
   ) {
     logger.info("Get spending to '" + endDate + "'.");
     return ResponseEntity.ok(energyUsageService.getSpendingTo(endDate));
@@ -53,8 +53,8 @@ public class EnergyUsageController {
 
   @GetMapping("/spending/between")
   public ResponseEntity<SpendingRangeDTO> getSpendingBetween(
-      @RequestParam("startDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date startDate,
-      @RequestParam("endDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date endDate
+      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime startDate,
+      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime endDate
   ) {
     logger.info("Get spending from '" + startDate + "' to '" + endDate + "'.");
     try {
@@ -68,8 +68,8 @@ public class EnergyUsageController {
 
   @GetMapping("/average/between")
   public ResponseEntity<List<SpendingRangeDTO>> getAverageSpendingBetween(
-      @RequestParam("startDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date startDate,
-      @RequestParam("endDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date endDate
+      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime startDate,
+      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime endDate
   ) {
     logger.info("Get average spending from '" + startDate + "' to '" + endDate + "' over '" + 7
         + "' day periods.");
@@ -92,8 +92,8 @@ public class EnergyUsageController {
 
   @GetMapping("/average/daily")
   public ResponseEntity<List<SpendingRangeDTO>> getAverageSpendingDaily(
-      @RequestParam("startDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date startDate,
-      @RequestParam("endDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date endDate
+      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime startDate,
+      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime endDate
   ) {
     logger.info("Get average daily spending from '" + startDate + "' to '" + endDate + "'.");
     try {
@@ -115,8 +115,8 @@ public class EnergyUsageController {
 
   @GetMapping("/average/weekly")
   public ResponseEntity<List<SpendingRangeDTO>> getAverageSpendingWeekly(
-      @RequestParam("startDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date startDate,
-      @RequestParam("endDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date endDate
+      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime startDate,
+      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime endDate
   ) {
     logger.info("Get average weekly spending from '" + startDate + "' to '" + endDate + "'.");
     try {
@@ -137,8 +137,8 @@ public class EnergyUsageController {
 
   @GetMapping("/average/monthly")
   public ResponseEntity<List<SpendingRangeDTO>> getAverageSpendingMonthly(
-      @RequestParam("startDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date startDate,
-      @RequestParam("endDate") @DateTimeFormat(pattern = DateConverter.PATTERN) Date endDate
+      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime startDate,
+      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime endDate
   ) {
     logger.info("Get average monthly spending from '" + startDate + "' to '" + endDate + "'.");
     try {

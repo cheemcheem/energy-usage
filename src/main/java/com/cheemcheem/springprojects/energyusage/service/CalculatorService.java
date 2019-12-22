@@ -8,14 +8,12 @@ import com.cheemcheem.springprojects.energyusage.repository.SpendingRangeReposit
 import com.cheemcheem.springprojects.energyusage.util.comparison.InstantComparison;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
-import java.util.function.BiFunction;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -38,23 +36,16 @@ public class CalculatorService {
   @NonNull
   private final SpendingRangeRepository spendingRangeRepository;
 
-  private static void resetToStartOfDay(Calendar calendar) {
-    calendar.set(Calendar.AM_PM, Calendar.AM);
-    calendar.set(Calendar.HOUR, 0);
-    calendar.set(Calendar.MINUTE, 0);
-    calendar.set(Calendar.SECOND, 0);
-    calendar.set(Calendar.MILLISECOND, 0);
-  }
-
-  private static BigDecimal lastSpending(Instant requestStartInstant, Instant requestEndInstant,
+  private static BigDecimal lastSpending(LocalDateTime requestStart, LocalDateTime requestEnd,
       SpendingRange last) {
 
-    double portionOfLast = getPortionOfLast(requestStartInstant, requestEndInstant, last);
+    double portionOfLast = getPortionOfLast(requestStart, requestEnd, last);
 
     return last.getUsage().multiply(BigDecimal.valueOf(portionOfLast));
   }
 
-  private static BigDecimal firstSpending(Instant requestStartInstant, Instant requestEndInstant,
+  private static BigDecimal firstSpending(LocalDateTime requestStartInstant,
+      LocalDateTime requestEndInstant,
       SpendingRange first) {
     double portionOfFirst = getPortionOfFirst(first, requestStartInstant, requestEndInstant);
 
@@ -70,19 +61,24 @@ public class CalculatorService {
     return middleSpending;
   }
 
-  private static double getPortionOfLast(Instant requestStartInstant, Instant requestEndInstant,
+  private static double getPortionOfLast(LocalDateTime requestStart, LocalDateTime requestEnd,
       SpendingRange last) {
     // Will not end up as 0 as long as last.end is after last.start
     long portionLast = 0;
 
-    var lastStartInstant = last.getStartDate().toInstant();
-    var lastEndInstant = last.getEndDate().toInstant();
-    var totalLast = last.getEndDate().getTime() - last.getStartDate().getTime();
+    var requestStartInstant = requestStart.toInstant(ZoneOffset.UTC);
+    var requestEndInstant = requestEnd.toInstant(ZoneOffset.UTC);
+    var lastStartInstant = last.getStartDate().toInstant(ZoneOffset.UTC);
+    var lastEndInstant = last.getEndDate().toInstant(ZoneOffset.UTC);
+
+    var totalLast = last.getEndDate().toInstant(ZoneOffset.UTC).toEpochMilli()
+        - last.getStartDate().toInstant(ZoneOffset.UTC).toEpochMilli();
 
     if (InstantComparison.isBeforeOrEqual(requestStartInstant, lastStartInstant)
         && InstantComparison.isBeforeOrEqual(requestEndInstant, lastEndInstant)) {
       // request starts before last range and ends within last range
-      portionLast = requestEndInstant.toEpochMilli() - last.getStartDate().getTime();
+      portionLast = requestEndInstant.toEpochMilli()
+          - last.getStartDate().toInstant(ZoneOffset.UTC).toEpochMilli();
     } else if (InstantComparison.isBeforeOrEqual(requestStartInstant, lastStartInstant)
         && InstantComparison.isBeforeOrEqual(lastEndInstant, requestEndInstant)) {
       // last range is fully within request
@@ -92,15 +88,18 @@ public class CalculatorService {
     return ((double) portionLast) / ((double) totalLast);
   }
 
-  private static double getPortionOfFirst(SpendingRange first, Instant requestStartInstant,
-      Instant requestEndInstant) {
+  private static double getPortionOfFirst(SpendingRange first, LocalDateTime requestStart,
+      LocalDateTime requestEnd) {
     // Will not end up as 0 as long as first.end is after first.start
     long portionFirst = 0;
 
-    var firstStartInstant = first.getStartDate().toInstant();
-    var firstEndInstant = first.getEndDate().toInstant();
+    var requestStartInstant = requestStart.toInstant(ZoneOffset.UTC);
+    var requestEndInstant = requestEnd.toInstant(ZoneOffset.UTC);
+    var firstStartInstant = first.getStartDate().toInstant(ZoneOffset.UTC);
+    var firstEndInstant = first.getEndDate().toInstant(ZoneOffset.UTC);
 
-    var totalFirst = first.getEndDate().getTime() - first.getStartDate().getTime();
+    var totalFirst = first.getEndDate().toInstant(ZoneOffset.UTC).toEpochMilli()
+        - first.getStartDate().toInstant(ZoneOffset.UTC).toEpochMilli();
 
     if (InstantComparison.isBeforeOrEqual(firstStartInstant, requestStartInstant)
         && InstantComparison.isBeforeOrEqual(requestEndInstant, firstEndInstant)) {
@@ -110,12 +109,14 @@ public class CalculatorService {
     } else if (InstantComparison.isBeforeOrEqual(firstStartInstant, requestStartInstant)
         && InstantComparison.isBeforeOrEqual(firstEndInstant, requestEndInstant)) {
       // Request starts after first range starts and ends after first range ends
-      portionFirst = first.getEndDate().getTime() - requestStartInstant.toEpochMilli();
+      portionFirst = first.getEndDate().toInstant(ZoneOffset.UTC).toEpochMilli()
+          - requestStartInstant.toEpochMilli();
 
     } else if (InstantComparison.isBeforeOrEqual(requestStartInstant, firstStartInstant)
         && InstantComparison.isBeforeOrEqual(requestEndInstant, firstEndInstant)) {
       // Request starts before first range and ends within first range
-      portionFirst = requestEndInstant.toEpochMilli() - first.getStartDate().getTime();
+      portionFirst = requestEndInstant.toEpochMilli()
+          - first.getStartDate().toInstant(ZoneOffset.UTC).toEpochMilli();
 
     } else if (InstantComparison.isBeforeOrEqual(requestStartInstant, firstStartInstant)
         && InstantComparison.isBeforeOrEqual(firstEndInstant, requestEndInstant)) {
@@ -133,23 +134,24 @@ public class CalculatorService {
           spendingRangeRepository.latest());
     } catch (EmptyRepositoryException e) {
       logger.warn(e.getMessage());
-      return new SpendingRange(Date.from(Instant.EPOCH), Date.from(Instant.now()), BigDecimal.ZERO);
+      return new SpendingRange(LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC),
+          LocalDateTime.now(), BigDecimal.ZERO);
     } catch (InvalidDateException e) {
       logger.error("Should never have InvalidDateReception thrown here.", e);
       throw new InternalStateException("Should never have InvalidDateReception thrown here.", e);
     }
   }
 
-  SpendingRange calculateSpendingAfterDate(Date startDate) {
+  SpendingRange calculateSpendingAfterDate(LocalDateTime startDate) {
     logger.info("Get spending from '" + startDate + "'.");
-    Date latest;
+    LocalDateTime latest;
 
     // handle usual case of repository being empty
     try {
       latest = spendingRangeRepository.latest();
     } catch (EmptyRepositoryException e) {
       logger.warn(e.getMessage());
-      return new SpendingRange(startDate, Date.from(Instant.now()), BigDecimal.ZERO);
+      return new SpendingRange(startDate, LocalDateTime.now(), BigDecimal.ZERO);
     }
 
     // handle case where start date is after latest repository date
@@ -162,16 +164,17 @@ public class CalculatorService {
     }
   }
 
-  SpendingRange calculateSpendingUntilDate(Date endDate) {
+  SpendingRange calculateSpendingUntilDate(LocalDateTime endDate) {
     logger.info("Get spending to '" + endDate + "'.");
-    Date earliest;
+    LocalDateTime earliest;
 
     // handle usual case of repository being empty
     try {
       earliest = spendingRangeRepository.earliest();
     } catch (EmptyRepositoryException e) {
       logger.warn(e.getMessage());
-      return new SpendingRange(Date.from(Instant.EPOCH), endDate, BigDecimal.ZERO);
+      return new SpendingRange(LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC), endDate,
+          BigDecimal.ZERO);
     }
 
     // handle case where end date is before earliest repository date
@@ -185,7 +188,7 @@ public class CalculatorService {
 
   }
 
-  SpendingRange calculateSpendingBetweenDates(Date startDate, Date endDate)
+  SpendingRange calculateSpendingBetweenDates(LocalDateTime startDate, LocalDateTime endDate)
       throws InvalidDateException {
     logger.info("Get spending from '" + startDate + "' to '" + endDate + "'.");
     return calculateSpending(startDate, endDate);
@@ -219,18 +222,11 @@ public class CalculatorService {
 
   }
 
-  List<SpendingRange> calculateAverageDailySpending(Date startDate, Date endDate)
+  List<SpendingRange> calculateAverageDailySpending(LocalDateTime startDate, LocalDateTime endDate)
       throws InvalidDateException {
     logger.info("Get average daily spending from '" + startDate + "' to '" + endDate + "'.");
-    var calendar = Calendar.getInstance();
-
-    calendar.setTime(startDate);
-    resetToStartOfDay(calendar);
-    startDate = calendar.getTime();
-
-    calendar.setTime(endDate);
-    resetToStartOfDay(calendar);
-    endDate = calendar.getTime();
+    startDate = startDate.withNano(0).withSecond(0).withMinute(0).withHour(0);
+    endDate = endDate.withNano(0).withSecond(0).withMinute(0).withHour(0);
 
     return calculateAverageSpending(startDate, endDate, 1);
   }
@@ -248,17 +244,10 @@ public class CalculatorService {
     }
   }
 
-  List<SpendingRange> calculateAverageWeeklySpending(Date startDate, Date endDate)
+  List<SpendingRange> calculateAverageWeeklySpending(LocalDateTime startDate, LocalDateTime endDate)
       throws InvalidDateException {
-    var calendar = Calendar.getInstance();
-
-    calendar.setTime(startDate);
-    resetToStartOfDay(calendar);
-    startDate = calendar.getTime();
-
-    calendar.setTime(endDate);
-    resetToStartOfDay(calendar);
-    endDate = calendar.getTime();
+    startDate = startDate.withNano(0).withSecond(0).withMinute(0).withHour(0);
+    endDate = endDate.withNano(0).withSecond(0).withMinute(0).withHour(0);
 
     return calculateAverageSpending(startDate, endDate, 7);
   }
@@ -276,129 +265,108 @@ public class CalculatorService {
     }
   }
 
-  List<SpendingRange> calculateAverageMonthlySpending(Date startDate, Date endDate)
+  List<SpendingRange> calculateAverageMonthlySpending(LocalDateTime startDate,
+      LocalDateTime endDate)
       throws InvalidDateException {
     logger.info("Get average monthly spending from '" + startDate + "' to '" + endDate + ".");
 
-    // instant representations
-    var requestStartInstant = startDate.toInstant();
-    var requestEndInstant = endDate.toInstant();
-
-    if (requestStartInstant.isAfter(requestEndInstant)) {
+    // Exceptional case: dates in wrong order
+    if (startDate.isAfter(endDate)) {
       logger.warn("Start date '" + startDate + "' occurs after end date '" + endDate + "'.");
       throw InvalidDateException.wrongWayAround(startDate, endDate);
     }
 
-    var startCalendar = Calendar.getInstance();
-
-    startCalendar.setTime(startDate);
-    resetToStartOfDay(startCalendar);
-    startCalendar.set(Calendar.DAY_OF_MONTH, 1);
-    startDate = startCalendar.getTime();
-
-    var endCalendar = Calendar.getInstance();
-    endCalendar.setTime(endDate);
-    resetToStartOfDay(endCalendar);
-    endCalendar.add(Calendar.MONTH, 1);
-    endCalendar.set(Calendar.DAY_OF_MONTH, 1);
-    endDate = endCalendar.getTime();
-
-    spendingRangeRepository.getSpendingRanges().stream()
-        .sorted(Comparator.comparing(SpendingRange::getStartDate))
-        .map(SpendingRange::toString)
-        .forEach(logger::debug);
-
-    BiFunction<Date, Date, Long> daysBetween =
-        (start, end) -> ChronoUnit.DAYS.between(start.toInstant(), end.toInstant());
-
     // Exceptional case: date range too small for gap
-    if (endCalendar.get(Calendar.MONTH) == startCalendar.get(Calendar.MONTH)
-        && endCalendar.get(Calendar.YEAR) == startCalendar.get(Calendar.YEAR)) {
+    if (ChronoUnit.MONTHS.between(startDate, endDate) == 0
+        && startDate.getMonthValue() == endDate.getMonthValue()) {
       var spendingRange = calculateSpending(startDate, endDate);
       var averageSpending = spendingRange.getUsage()
-          .divide(BigDecimal.valueOf(endCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)),
+          .divide(BigDecimal.valueOf((endDate.getDayOfMonth() - startDate.getDayOfMonth())),
               RoundingMode.HALF_UP);
       return List.of(new SpendingRange(startDate, endDate, averageSpending));
     }
 
+    // Normal case
     var averageSpendingList = new ArrayList<SpendingRange>();
-    var lastEndDate = startDate;
-    var lastEndCalendar = Calendar.getInstance();
-    lastEndCalendar.setTime(lastEndDate);
+    var startOfEndMonth = endDate.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0)
+        .withNano(0);
+    var endOfStartMonth = startDate.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0)
+        .withNano(0).plusMonths(1).minusNanos(1);
+    var currentMonth = startDate;
 
-    // Loop while there is at least a month between the last end date and the overall end date
-    while (!(lastEndCalendar.get(Calendar.MONTH) == endCalendar.get(Calendar.MONTH)
-        && lastEndCalendar.get(Calendar.YEAR) == endCalendar.get(Calendar.YEAR))) {
+    while (ChronoUnit.MONTHS.between(currentMonth, startOfEndMonth) > -1) {
+      logger.debug("Average Monthly Spending so far {}.", averageSpendingList);
 
-      // Use calendar to get next end date (last end date + day gap)
-      lastEndCalendar.setTime(lastEndDate);
-      lastEndCalendar.add(Calendar.MONTH, 1);
-      var newEndDate = lastEndCalendar.getTime();
+      if (ChronoUnit.MONTHS.between(currentMonth, startDate) == 0) {
+        logger.debug("Calculating the first month's average.");
+        averageSpendingList.add(calculateAverageOfFractionOfMonth(startDate, endOfStartMonth));
+        currentMonth = currentMonth.plusMonths(1);
+        continue;
+      }
 
-      // Get total spending between two dates that are day gap days apart
-      var totalSpending = calculateSpending(lastEndDate, newEndDate);
+      if (ChronoUnit.MONTHS.between(currentMonth, endDate) == 0) {
+        logger.debug("Calculating the final month's average.");
+        averageSpendingList.add(calculateAverageOfFractionOfMonth(startOfEndMonth, endDate));
+        currentMonth = currentMonth.plusMonths(1);
+        continue;
+      }
 
-      // Average the total spending between those dates by dividing by day gap
-
-      var diff = daysBetween.apply(lastEndDate, newEndDate);
-      var averageReading = totalSpending.getUsage()
-          .divide(BigDecimal.valueOf(diff), RoundingMode.HALF_UP);
-
-      averageSpendingList.add(
-          new SpendingRange(
-              lastEndDate,
-              newEndDate,
-              averageReading
-          )
-      );
-
-      logger.debug(averageSpendingList.toString());
-
-      lastEndDate = newEndDate;
+      logger.debug("Calculating a middle month's average.");
+      var startOfMonth = currentMonth.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0)
+          .withNano(0);
+      var endOfMonth = startOfMonth.plusMonths(1).minusNanos(1);
+      averageSpendingList.add(calculateAverageOfFractionOfMonth(startOfMonth, endOfMonth));
+      currentMonth = currentMonth.plusMonths(1);
     }
 
+    logger.debug("Final average monthly spending list:");
+    averageSpendingList.stream().map(SpendingRange::toString).forEach(logger::debug);
     return averageSpendingList;
-
 
   }
 
-  List<SpendingRange> calculateAverageSpending(Date startDate, Date endDate, int dayGap)
+  private SpendingRange calculateAverageOfFractionOfMonth(LocalDateTime startOfMonth,
+      LocalDateTime endOfMonth) throws InvalidDateException {
+    var spending = calculateSpending(startOfMonth, endOfMonth);
+    logger.debug("Total spending for this month {}.", spending);
+    var differenceInSeconds = ChronoUnit.NANOS.between(startOfMonth, endOfMonth);
+    var secondDay = ChronoUnit.DAYS.getDuration().toNanos();
+    var average = spending.getUsage()
+        .multiply(BigDecimal.valueOf(secondDay))
+        .divide(BigDecimal.valueOf(differenceInSeconds), RoundingMode.HALF_UP)
+        .setScale(2, RoundingMode.HALF_UP);
+    var spendingRange = new SpendingRange(
+        startOfMonth,
+        endOfMonth,
+        average
+    );
+    logger.debug("Average spending for this month {}.", spendingRange);
+    return spendingRange;
+  }
+
+  List<SpendingRange> calculateAverageSpending(LocalDateTime startDate, LocalDateTime endDate,
+      int dayGap)
       throws InvalidDateException {
-    logger.info("Get average spending from '" + startDate + "' to '" + endDate + "' over '" + dayGap
-        + "' day periods.");
-    spendingRangeRepository.getSpendingRanges().stream()
-        .sorted(Comparator.comparing(SpendingRange::getStartDate))
-        .map(SpendingRange::toString)
-        .forEach(logger::debug);
+    logger.info("Get average spending from '{}' to '{}' over '{}' day periods.", startDate,
+        endDate, dayGap);
 
-    // instant representations
-    var requestStartInstant = startDate.toInstant();
-    var requestEndInstant = endDate.toInstant();
-
-    if (requestStartInstant.isAfter(requestEndInstant)) {
+    if (startDate.isAfter(endDate)) {
       logger.warn("Start date '" + startDate + "' occurs after end date '" + endDate + "'.");
       throw InvalidDateException.wrongWayAround(startDate, endDate);
     }
 
-    BiFunction<Date, Date, Long> daysBetween =
-        (start, end) -> ChronoUnit.DAYS.between(start.toInstant(), end.toInstant());
-
     // Exceptional case: date range too small for gap
-    if (daysBetween.apply(startDate, endDate) < dayGap) {
+    if (ChronoUnit.DAYS.between(startDate, endDate) < dayGap) {
       return List.of();
     }
 
     var averageSpendingList = new ArrayList<SpendingRange>();
     var lastEndDate = startDate;
-    var calendar = Calendar.getInstance();
 
     // Loop while there are day gap days between the last end date and the overall end date
-    while (daysBetween.apply(lastEndDate, endDate) >= dayGap) {
+    while (ChronoUnit.DAYS.between(lastEndDate, endDate) >= dayGap) {
 
-      // Use calendar to get next end date (last end date + day gap)
-      calendar.setTime(lastEndDate);
-      calendar.add(Calendar.DAY_OF_MONTH, dayGap);
-      var newEndDate = calendar.getTime();
+      var newEndDate = lastEndDate.plusDays(dayGap);
 
       // Get total spending between two dates that are day gap days apart
       var totalSpending = calculateSpending(lastEndDate, newEndDate);
@@ -418,27 +386,26 @@ public class CalculatorService {
       lastEndDate = newEndDate;
     }
 
-    logger.debug("averageSpendingList = " + averageSpendingList);
+    logger.debug("Final average spending list over {} day periods:", dayGap);
+    averageSpendingList.stream().map(SpendingRange::toString).forEach(logger::debug);
 
     return averageSpendingList;
 
   }
 
-  private SpendingRange calculateSpending(Date startDate, Date endDate)
+  private SpendingRange calculateSpending(LocalDateTime startDate, LocalDateTime endDate)
       throws InvalidDateException {
-    // instant representations
-    var requestStartInstant = startDate.toInstant();
-    var requestEndInstant = endDate.toInstant();
 
-    if (requestStartInstant.isAfter(requestEndInstant)) {
+    if (startDate.isAfter(endDate)) {
       logger.warn("Start date '" + startDate + "' occurs after end date '" + endDate + "'.");
       throw InvalidDateException.wrongWayAround(startDate, endDate);
     }
+
     // get sublist of spending ranges
     var sublist = new ArrayList<>(spendingRangeRepository.getBetweenDates(startDate, endDate));
     sublist.sort(Comparator.comparing(SpendingRange::getStartDate));
-    logger.debug(
-        "Sublist of spending ranges between '" + startDate + "' and '" + endDate + "': " + sublist);
+    logger.debug("Sublist of spending ranges between '{}' and '{}':", startDate, endDate);
+    sublist.stream().map(SpendingRange::toString).forEach(logger::debug);
 
     if (sublist.size() == 0) {
       logger.debug("No spending ranges found.");
@@ -446,7 +413,7 @@ public class CalculatorService {
     }
 
     // handle first case
-    var firstSpending = firstSpending(requestStartInstant, requestEndInstant, sublist.get(0));
+    var firstSpending = firstSpending(startDate, endDate, sublist.get(0));
     logger.debug("First spending: " + firstSpending);
 
     if (sublist.size() == 1) {
@@ -458,8 +425,7 @@ public class CalculatorService {
     logger.debug("Middle spending: " + middleSpending);
 
     // handle final case
-    var lastSpending = lastSpending(requestStartInstant, requestEndInstant,
-        sublist.get(sublist.size() - 1));
+    var lastSpending = lastSpending(startDate, endDate, sublist.get(sublist.size() - 1));
     logger.debug("Last spending: " + lastSpending);
 
     var totalSpending = firstSpending.add(middleSpending).add(lastSpending);

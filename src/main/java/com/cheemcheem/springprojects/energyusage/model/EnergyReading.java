@@ -4,7 +4,7 @@ import com.cheemcheem.springprojects.energyusage.util.importer.CSVDateColumnConv
 import com.cheemcheem.springprojects.energyusage.util.importer.CSVReadingColumnConverter;
 import com.opencsv.bean.CsvCustomBindByPosition;
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -17,7 +17,7 @@ public class EnergyReading implements Comparable<EnergyReading> {
 
   @CsvCustomBindByPosition(converter = CSVDateColumnConverter.class, position = 0)
   @NonNull
-  private Date date;
+  private LocalDateTime date;
 
   @CsvCustomBindByPosition(converter = CSVReadingColumnConverter.class, position = 1)
   @NonNull

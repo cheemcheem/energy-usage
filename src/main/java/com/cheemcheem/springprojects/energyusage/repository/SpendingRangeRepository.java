@@ -2,9 +2,8 @@ package com.cheemcheem.springprojects.energyusage.repository;
 
 import com.cheemcheem.springprojects.energyusage.exception.EmptyRepositoryException;
 import com.cheemcheem.springprojects.energyusage.model.SpendingRange;
-import com.cheemcheem.springprojects.energyusage.util.comparison.InstantComparison;
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Date;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import lombok.Data;
@@ -18,26 +17,25 @@ public class SpendingRangeRepository {
   @NonNull
   private Collection<SpendingRange> spendingRanges;
 
-  public Collection<SpendingRange> getBetweenDates(Date startDate, Date endDate) {
-    var startInstant = startDate.toInstant();
-    var endInstant = endDate.toInstant();
+  public Collection<SpendingRange> getBetweenDates(LocalDateTime startDate, LocalDateTime endDate) {
+
     return spendingRanges.stream()
-        .filter(s -> InstantComparison.isAfterOrEqual(s.getEndDate().toInstant(), startInstant))
-        .filter(s -> InstantComparison.isBeforeOrEqual(s.getStartDate().toInstant(), endInstant))
+        .filter(s -> !s.getEndDate().isBefore(startDate))
+        .filter(s -> !s.getStartDate().isAfter(endDate))
         .collect(Collectors.toList());
   }
 
-  public Date earliest() throws EmptyRepositoryException {
+  public LocalDateTime earliest() throws EmptyRepositoryException {
     return this.spendingRanges.stream()
         .map(SpendingRange::getStartDate)
-        .min(Date::compareTo)
+        .min(LocalDateTime::compareTo)
         .orElseThrow(throwBecauseNothingInStream());
   }
 
-  public Date latest() throws EmptyRepositoryException {
+  public LocalDateTime latest() throws EmptyRepositoryException {
     return this.spendingRanges.stream()
         .map(SpendingRange::getEndDate)
-        .max(Date::compareTo)
+        .max(LocalDateTime::compareTo)
         .orElseThrow(throwBecauseNothingInStream());
   }
 

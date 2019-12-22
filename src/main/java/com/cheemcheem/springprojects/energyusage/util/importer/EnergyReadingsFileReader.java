@@ -11,12 +11,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 
 @RequiredArgsConstructor
-public class EnergyReadingsFileReaderService {
+public class EnergyReadingsFileReader {
 
   @NonNull
   private final String csvPath;
@@ -47,7 +48,9 @@ public class EnergyReadingsFileReaderService {
 
   public Collection<SpendingRange> getEnergyReadingsRange()
       throws IOException, EmptyRepositoryException {
-    var energyReadings = new ArrayList<>(getEnergyReadings());
+    // use set to remove duplicates, if this is not done spending ranges with start = end
+    // and usage = 0 will occur and will cause errors
+    var energyReadings = new ArrayList<>(new HashSet<>(getEnergyReadings()));
 
     if (energyReadings.size() < 2) {
       throw new EmptyRepositoryException("Not enough readings to do analysis with.");

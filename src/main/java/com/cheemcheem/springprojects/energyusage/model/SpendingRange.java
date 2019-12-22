@@ -1,7 +1,7 @@
 package com.cheemcheem.springprojects.energyusage.model;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.Data;
 import lombok.NonNull;
 
@@ -9,9 +9,9 @@ import lombok.NonNull;
 public class SpendingRange {
 
   @NonNull
-  private final Date startDate;
+  private final LocalDateTime startDate;
   @NonNull
-  private final Date endDate;
+  private final LocalDateTime endDate;
   @NonNull
   private final BigDecimal usage;
 }
