@@ -3,8 +3,10 @@ package com.cheemcheem.springprojects.energyusage.config;
 import com.cheemcheem.springprojects.energyusage.model.EnergyReading;
 import com.cheemcheem.springprojects.energyusage.util.importers.EnergyReadingsFileReaderService;
 import com.cheemcheem.springprojects.energyusage.util.mappers.SpendingRangeMapper;
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.TreeSet;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,9 @@ public class EnergyReadingConfig {
 
   @Bean
   public Collection<EnergyReading> readCSV() throws IOException {
+    if (!new File(csvPath).exists()) {
+      return Collections.emptySet();
+    }
     var csvBeanCreator = new EnergyReadingsFileReaderService(this.csvPath);
     csvBeanCreator.initialise();
     return new TreeSet<>(csvBeanCreator.getEnergyReadings());
