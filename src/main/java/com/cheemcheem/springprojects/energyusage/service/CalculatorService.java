@@ -5,7 +5,6 @@ import com.cheemcheem.springprojects.energyusage.exception.InternalStateExceptio
 import com.cheemcheem.springprojects.energyusage.exception.InvalidDateException;
 import com.cheemcheem.springprojects.energyusage.model.SpendingRange;
 import com.cheemcheem.springprojects.energyusage.repository.SpendingRangeRepository;
-import com.cheemcheem.springprojects.energyusage.util.comparison.InstantComparison;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -66,21 +65,13 @@ public class CalculatorService {
     // Will not end up as 0 as long as last.end is after last.start
     long portionLast = 0;
 
-    var requestStartInstant = requestStart.toInstant(ZoneOffset.UTC);
-    var requestEndInstant = requestEnd.toInstant(ZoneOffset.UTC);
-    var lastStartInstant = last.getStartDate().toInstant(ZoneOffset.UTC);
-    var lastEndInstant = last.getEndDate().toInstant(ZoneOffset.UTC);
+    var totalLast = last.getStartDate().until(last.getEndDate(), ChronoUnit.MILLIS);
 
-    var totalLast = last.getEndDate().toInstant(ZoneOffset.UTC).toEpochMilli()
-        - last.getStartDate().toInstant(ZoneOffset.UTC).toEpochMilli();
-
-    if (InstantComparison.isBeforeOrEqual(requestStartInstant, lastStartInstant)
-        && InstantComparison.isBeforeOrEqual(requestEndInstant, lastEndInstant)) {
+    if (!requestStart.isAfter(last.getStartDate()) && !requestEnd.isAfter(last.getEndDate())) {
       // request starts before last range and ends within last range
-      portionLast = requestEndInstant.toEpochMilli()
-          - last.getStartDate().toInstant(ZoneOffset.UTC).toEpochMilli();
-    } else if (InstantComparison.isBeforeOrEqual(requestStartInstant, lastStartInstant)
-        && InstantComparison.isBeforeOrEqual(lastEndInstant, requestEndInstant)) {
+      portionLast = last.getStartDate().until(requestEnd, ChronoUnit.MILLIS);
+    } else if (!requestStart.isAfter(last.getStartDate())
+        && !last.getEndDate().isAfter(requestEnd)) {
       // last range is fully within request
       portionLast = totalLast;
     }
@@ -93,33 +84,24 @@ public class CalculatorService {
     // Will not end up as 0 as long as first.end is after first.start
     long portionFirst = 0;
 
-    var requestStartInstant = requestStart.toInstant(ZoneOffset.UTC);
-    var requestEndInstant = requestEnd.toInstant(ZoneOffset.UTC);
-    var firstStartInstant = first.getStartDate().toInstant(ZoneOffset.UTC);
-    var firstEndInstant = first.getEndDate().toInstant(ZoneOffset.UTC);
+    var totalFirst = first.getStartDate().until(first.getEndDate(), ChronoUnit.MILLIS);
 
-    var totalFirst = first.getEndDate().toInstant(ZoneOffset.UTC).toEpochMilli()
-        - first.getStartDate().toInstant(ZoneOffset.UTC).toEpochMilli();
-
-    if (InstantComparison.isBeforeOrEqual(firstStartInstant, requestStartInstant)
-        && InstantComparison.isBeforeOrEqual(requestEndInstant, firstEndInstant)) {
+    if (!first.getStartDate().isAfter(requestStart) && !requestEnd.isAfter(first.getEndDate())) {
       // Request is fully inside first range
-      portionFirst = requestEndInstant.toEpochMilli() - requestStartInstant.toEpochMilli();
+      portionFirst = requestStart.until(requestEnd, ChronoUnit.MILLIS);
 
-    } else if (InstantComparison.isBeforeOrEqual(firstStartInstant, requestStartInstant)
-        && InstantComparison.isBeforeOrEqual(firstEndInstant, requestEndInstant)) {
+    } else if (!first.getStartDate().isAfter(requestStart)
+        && !first.getEndDate().isAfter(requestEnd)) {
       // Request starts after first range starts and ends after first range ends
-      portionFirst = first.getEndDate().toInstant(ZoneOffset.UTC).toEpochMilli()
-          - requestStartInstant.toEpochMilli();
+      portionFirst = requestStart.until(first.getEndDate(), ChronoUnit.MILLIS);
 
-    } else if (InstantComparison.isBeforeOrEqual(requestStartInstant, firstStartInstant)
-        && InstantComparison.isBeforeOrEqual(requestEndInstant, firstEndInstant)) {
+    } else if (!requestStart.isAfter(first.getStartDate())
+        && !requestEnd.isAfter(first.getEndDate())) {
       // Request starts before first range and ends within first range
-      portionFirst = requestEndInstant.toEpochMilli()
-          - first.getStartDate().toInstant(ZoneOffset.UTC).toEpochMilli();
+      portionFirst = first.getStartDate().until(requestEnd, ChronoUnit.MILLIS);
 
-    } else if (InstantComparison.isBeforeOrEqual(requestStartInstant, firstStartInstant)
-        && InstantComparison.isBeforeOrEqual(firstEndInstant, requestEndInstant)) {
+    } else if (!requestStart.isAfter(first.getStartDate())
+        && !first.getEndDate().isAfter(requestEnd)) {
       // Request starts before first and ends after first
       portionFirst = totalFirst;
     }

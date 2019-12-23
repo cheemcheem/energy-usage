@@ -36,7 +36,6 @@ public class EnergyUsageService {
 
   public SpendingRangeDTO getAllSpending() {
     logger.info("Get all spending.");
-
     var spendingRange = this.calculatorService.calculateAllSpending();
     return this.spendingRangeMapper.toDTO(spendingRange);
 

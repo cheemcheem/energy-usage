@@ -1,5 +1,9 @@
 package com.cheemcheem.springprojects.energyusage.service;
 
+import static com.cheemcheem.springprojects.energyusage.tests.util.LocalDateTimeHelper.DAY;
+import static com.cheemcheem.springprojects.energyusage.tests.util.LocalDateTimeHelper.HALF_DAY;
+import static com.cheemcheem.springprojects.energyusage.tests.util.LocalDateTimeHelper.QUARTER_DAY;
+import static com.cheemcheem.springprojects.energyusage.tests.util.LocalDateTimeHelper.toLocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,9 +13,7 @@ import com.cheemcheem.springprojects.energyusage.model.SpendingRange;
 import com.cheemcheem.springprojects.energyusage.repository.SpendingRangeRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -25,19 +27,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 class CalculatorServiceTest {
 
 
-  public static final long DAY = 86400000L;
-  public static final long HALF_DAY = DAY / 2;
-  public static final long QUARTER_DAY = HALF_DAY / 2;
-
   private final List<SpendingRange> spendingRanges = new ArrayList<>();
   private final SpendingRangeRepository spendingRangeRepository = new SpendingRangeRepository(
       spendingRanges);
   private final CalculatorService calculatorService = new CalculatorService(
       spendingRangeRepository);
-
-  private static LocalDateTime toLocalDateTime(long day) {
-    return LocalDateTime.ofInstant(Instant.ofEpochMilli(day), ZoneOffset.UTC.normalized());
-  }
 
   @BeforeEach
   void setup() {

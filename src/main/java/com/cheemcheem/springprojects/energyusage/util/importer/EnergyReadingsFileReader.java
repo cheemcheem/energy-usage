@@ -1,23 +1,28 @@
 package com.cheemcheem.springprojects.energyusage.util.importer;
 
-import com.cheemcheem.springprojects.energyusage.exception.EmptyRepositoryException;
 import com.cheemcheem.springprojects.energyusage.model.EnergyReading;
 import com.cheemcheem.springprojects.energyusage.model.SpendingRange;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvToBeanBuilder;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 @RequiredArgsConstructor
 public class EnergyReadingsFileReader {
+
+  private final Logger logger = LoggerFactory.getLogger(EnergyReadingsFileReader.class);
 
   @NonNull
   private final String csvPath;
@@ -25,9 +30,14 @@ public class EnergyReadingsFileReader {
 
   public void initialise() {
     this.systemResource = ClassLoader.getSystemResource(this.csvPath).getPath();
+    logger.debug("Initialised with {} to get {}.", this.csvPath, this.systemResource);
   }
 
   public Collection<EnergyReading> getEnergyReadings() throws IOException {
+    if (!new File(this.systemResource).exists()) {
+      logger.warn("No input.csv file found!");
+      return Collections.emptySet();
+    }
     if (this.systemResource == null) {
       throw new IllegalStateException(
           "This instance has not been initialised successfully with initialise().");
@@ -46,14 +56,14 @@ public class EnergyReadingsFileReader {
     return list;
   }
 
-  public Collection<SpendingRange> getEnergyReadingsRange()
-      throws IOException, EmptyRepositoryException {
+  public Collection<SpendingRange> getEnergyReadingsRange() throws IOException {
     // use set to remove duplicates, if this is not done spending ranges with start = end
     // and usage = 0 will occur and will cause errors
     var energyReadings = new ArrayList<>(new HashSet<>(getEnergyReadings()));
 
     if (energyReadings.size() < 2) {
-      throw new EmptyRepositoryException("Not enough readings to do analysis with.");
+      logger.warn("Not enough readings to do analysis with.");
+      return Collections.emptySet();
     }
 
     energyReadings.sort(Comparator.comparing(EnergyReading::getDate));
