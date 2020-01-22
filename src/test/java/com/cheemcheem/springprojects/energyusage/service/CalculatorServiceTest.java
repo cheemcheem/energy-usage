@@ -311,15 +311,38 @@ class CalculatorServiceTest {
   @Nested
   class DailyAverageTests {
 
-
     @Test
-    void dailyAverageOverNoDays() {
+    void dailyAverageOverNoDays() throws InvalidDateException {
+      var requestStartDate = toLocalDateTime(DAY);
+      var requestEndDate = toLocalDateTime(DAY);
+      var expectedUsage = BigDecimal.valueOf(0.00).setScale(2, RoundingMode.HALF_UP);
 
+      var result = calculatorService
+          .calculateAverageDailySpending(requestStartDate, requestEndDate);
+      var resultUsage = result.stream()
+          .map(SpendingRange::getUsage)
+          .reduce(BigDecimal::add)
+          .orElse(BigDecimal.ZERO)
+          .setScale(2, RoundingMode.HALF_UP);
+      assertThat(resultUsage).isEqualTo(expectedUsage);
+      assertThat(result).isEmpty();
     }
 
     @Test
-    void dailyAverageOverHalfDay() {
+    void dailyAverageOverHalfDay() throws InvalidDateException {
+      var requestStartDate = toLocalDateTime(DAY);
+      var requestEndDate = toLocalDateTime(DAY + HALF_DAY);
+      var expectedUsage = BigDecimal.valueOf(0.00).setScale(2, RoundingMode.HALF_UP);
 
+      var result = calculatorService
+          .calculateAverageDailySpending(requestStartDate, requestEndDate);
+      var resultUsage = result.stream()
+          .map(SpendingRange::getUsage)
+          .reduce(BigDecimal::add)
+          .orElse(BigDecimal.ZERO)
+          .setScale(2, RoundingMode.HALF_UP);
+      assertThat(resultUsage).isEqualTo(expectedUsage);
+      assertThat(result).isEmpty();
     }
 
     @Test
@@ -341,18 +364,76 @@ class CalculatorServiceTest {
     }
 
     @Test
-    void dailyAverageOver2Days() {
+    void dailyAverageOver2Days() throws InvalidDateException {
+      var requestStartDate = toLocalDateTime(DAY);
+      var requestEndDate = toLocalDateTime(3 * DAY);
+      var expectedUsage = BigDecimal.valueOf(20.00).setScale(2, RoundingMode.HALF_UP);
 
+      var result = calculatorService
+          .calculateAverageDailySpending(requestStartDate, requestEndDate);
+      var resultUsage = result.stream()
+          .map(SpendingRange::getUsage)
+          .reduce(BigDecimal::add)
+          .orElse(BigDecimal.ZERO)
+          .setScale(2, RoundingMode.HALF_UP);
+      assertThat(resultUsage).isEqualTo(expectedUsage);
+      assertThat(result.get(0).getStartDate()).isEqualTo(requestStartDate);
+      assertThat(result.get(result.size() - 1).getEndDate()).isEqualTo(requestEndDate);
     }
 
     @Test
-    void dailyAverageOver3Days() {
+    void dailyAverageOver3Days() throws InvalidDateException {
+      var requestStartDate = toLocalDateTime(DAY);
+      var requestEndDate = toLocalDateTime(4 * DAY);
+      var expectedUsage = BigDecimal.valueOf(30.00).setScale(2, RoundingMode.HALF_UP);
 
+      var result = calculatorService
+          .calculateAverageDailySpending(requestStartDate, requestEndDate);
+      var resultUsage = result.stream()
+          .map(SpendingRange::getUsage)
+          .reduce(BigDecimal::add)
+          .orElse(BigDecimal.ZERO)
+          .setScale(2, RoundingMode.HALF_UP);
+      assertThat(resultUsage).isEqualTo(expectedUsage);
+      assertThat(result.get(0).getStartDate()).isEqualTo(requestStartDate);
+      assertThat(result.get(result.size() - 1).getEndDate()).isEqualTo(requestEndDate);
     }
 
     @Test
-    void dailyAverageOver10Days() {
+    void dailyAverageOver10Days() throws InvalidDateException {
 
+      // extend initial condition
+      spendingRanges.addAll(List.of(
+          new SpendingRange(
+              toLocalDateTime(4 * DAY), toLocalDateTime(5 * DAY), BigDecimal.TEN),
+          new SpendingRange(
+              toLocalDateTime(5 * DAY), toLocalDateTime(6 * DAY), BigDecimal.TEN),
+          new SpendingRange(
+              toLocalDateTime(6 * DAY), toLocalDateTime(7 * DAY), BigDecimal.TEN),
+          new SpendingRange(
+              toLocalDateTime(7 * DAY), toLocalDateTime(8 * DAY), BigDecimal.TEN),
+          new SpendingRange(
+              toLocalDateTime(8 * DAY), toLocalDateTime(9 * DAY), BigDecimal.TEN),
+          new SpendingRange(
+              toLocalDateTime(9 * DAY), toLocalDateTime(10 * DAY), BigDecimal.TEN),
+          new SpendingRange(
+              toLocalDateTime(10 * DAY), toLocalDateTime(11 * DAY), BigDecimal.TEN)
+      ));
+
+      var requestStartDate = toLocalDateTime(DAY);
+      var requestEndDate = toLocalDateTime(11 * DAY);
+      var expectedUsage = BigDecimal.valueOf(100.00).setScale(2, RoundingMode.HALF_UP);
+
+      var result = calculatorService
+          .calculateAverageDailySpending(requestStartDate, requestEndDate);
+      var resultUsage = result.stream()
+          .map(SpendingRange::getUsage)
+          .reduce(BigDecimal::add)
+          .orElse(BigDecimal.ZERO)
+          .setScale(2, RoundingMode.HALF_UP);
+      assertThat(resultUsage).isEqualTo(expectedUsage);
+      assertThat(result.get(0).getStartDate()).isEqualTo(requestStartDate);
+      assertThat(result.get(result.size() - 1).getEndDate()).isEqualTo(requestEndDate);
     }
 
     @Test
@@ -375,6 +456,51 @@ class CalculatorServiceTest {
 
       assertThrows(InvalidDateException.class,
           () -> calculatorService.calculateAverageWeeklySpending(startDate, endDate));
+    }
+
+
+    /**
+     * Ensure that it will calculate average daily spending per week for a range that goes over a
+     * new year. Over 4 weeks, 90 was spent, making the average daily value for each range = 90 / (4
+     * * 7) ~= 3.21
+     */
+    @Test
+    void worksOverMultipleYears() {
+      var startRange = LocalDateTime.of(1970, 12, 22, 0, 0, 0, 0);
+      var endRange = LocalDateTime.of(1971, 1, 19, 0, 0, 0, 0);
+      var valRange = BigDecimal.valueOf(90);
+
+      spendingRanges.clear();
+      spendingRanges.addAll(List.of(
+          new SpendingRange(startRange, endRange, valRange)
+      ));
+
+      var startOne = LocalDateTime.of(1970, 12, 22, 0, 0, 0, 0);
+      var endOne = LocalDateTime.of(1970, 12, 29, 0, 0, 0, 0);
+      var valOne = BigDecimal.valueOf(3.21);
+
+      var startTwo = LocalDateTime.of(1970, 12, 29, 0, 0, 0, 0);
+      var endTwo = LocalDateTime.of(1971, 1, 5, 0, 0, 0, 0);
+      var valTwo = BigDecimal.valueOf(3.21);
+
+      var startThree = LocalDateTime.of(1971, 1, 5, 0, 0, 0, 0);
+      var endThree = LocalDateTime.of(1971, 1, 12, 0, 0, 0, 0);
+      var valThree = BigDecimal.valueOf(3.21);
+
+      var startFour = LocalDateTime.of(1971, 1, 12, 0, 0, 0, 0);
+      var endFour = LocalDateTime.of(1971, 1, 19, 0, 0, 0, 0);
+      var valFour = BigDecimal.valueOf(3.21);
+
+      var expectedWeekOne = new SpendingRange(startOne, endOne, valOne);
+      var expectedWeekTwo = new SpendingRange(startTwo, endTwo, valTwo);
+      var expectedWeekThree = new SpendingRange(startThree, endThree, valThree);
+      var expectedWeekFour = new SpendingRange(startFour, endFour, valFour);
+
+      var results = calculatorService.calculateAverageWeeklySpending();
+
+      assertThat(results)
+          .containsExactlyInAnyOrder(expectedWeekOne, expectedWeekTwo, expectedWeekThree,
+              expectedWeekFour);
     }
   }
 
