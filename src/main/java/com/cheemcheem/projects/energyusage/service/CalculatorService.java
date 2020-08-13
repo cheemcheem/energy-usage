@@ -15,8 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
@@ -26,11 +25,11 @@ import org.springframework.stereotype.Service;
  *
  * @see SpendingRangeRepository
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CalculatorService {
 
-  private final Logger logger = LoggerFactory.getLogger(CalculatorService.class);
 
   @NonNull
   private final SpendingRangeRepository spendingRangeRepository;
@@ -110,29 +109,29 @@ public class CalculatorService {
   }
 
   SpendingRange calculateAllSpending() {
-    logger.info("Get all spending.");
+    log.info("Get all spending.");
     try {
       return calculateSpending(spendingRangeRepository.earliest(),
           spendingRangeRepository.latest());
     } catch (EmptyRepositoryException e) {
-      logger.warn(e.getMessage());
+      log.warn(e.getMessage());
       return new SpendingRange(LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC),
           LocalDateTime.now(), BigDecimal.ZERO);
     } catch (InvalidDateException e) {
-      logger.error("Should never have InvalidDateReception thrown here.", e);
+      log.error("Should never have InvalidDateReception thrown here.", e);
       throw new InternalStateException("Should never have InvalidDateReception thrown here.", e);
     }
   }
 
   SpendingRange calculateSpendingAfterDate(LocalDateTime startDate) {
-    logger.info("Get spending from '" + startDate + "'.");
+    log.info("Get spending from '" + startDate + "'.");
     LocalDateTime latest;
 
     // handle usual case of repository being empty
     try {
       latest = spendingRangeRepository.latest();
     } catch (EmptyRepositoryException e) {
-      logger.warn(e.getMessage());
+      log.warn(e.getMessage());
       return new SpendingRange(startDate, LocalDateTime.now(), BigDecimal.ZERO);
     }
 
@@ -140,21 +139,21 @@ public class CalculatorService {
     try {
       return calculateSpending(startDate, latest);
     } catch (InvalidDateException ignored) {
-      logger.warn("No spending from start date '" + startDate
+      log.warn("No spending from start date '" + startDate
           + "' as that is after latest repository date '" + latest + "'. ");
       return new SpendingRange(startDate, latest, BigDecimal.ZERO);
     }
   }
 
   SpendingRange calculateSpendingUntilDate(LocalDateTime endDate) {
-    logger.info("Get spending to '" + endDate + "'.");
+    log.info("Get spending to '" + endDate + "'.");
     LocalDateTime earliest;
 
     // handle usual case of repository being empty
     try {
       earliest = spendingRangeRepository.earliest();
     } catch (EmptyRepositoryException e) {
-      logger.warn(e.getMessage());
+      log.warn(e.getMessage());
       return new SpendingRange(LocalDateTime.ofEpochSecond(0, 0, ZoneOffset.UTC), endDate,
           BigDecimal.ZERO);
     }
@@ -163,7 +162,7 @@ public class CalculatorService {
     try {
       return calculateSpending(earliest, endDate);
     } catch (InvalidDateException ignored) {
-      logger.warn("No spending before end date '" + endDate
+      log.warn("No spending before end date '" + endDate
           + "' as that is before earliest repository date '" + earliest + "'. ");
       return new SpendingRange(earliest, endDate, BigDecimal.ZERO);
     }
@@ -172,7 +171,7 @@ public class CalculatorService {
 
   SpendingRange calculateSpendingBetweenDates(LocalDateTime startDate, LocalDateTime endDate)
       throws InvalidDateException {
-    logger.info("Get spending from '" + startDate + "' to '" + endDate + "'.");
+    log.info("Get spending from '" + startDate + "' to '" + endDate + "'.");
     return calculateSpending(startDate, endDate);
   }
 
@@ -181,10 +180,10 @@ public class CalculatorService {
       return calculateAverageDailySpending(spendingRangeRepository.earliest(),
           spendingRangeRepository.latest());
     } catch (EmptyRepositoryException e) {
-      logger.warn(e.getMessage());
+      log.warn(e.getMessage());
       return List.of();
     } catch (InvalidDateException e) {
-      logger.error("Should never have InvalidDateReception thrown here.", e);
+      log.error("Should never have InvalidDateReception thrown here.", e);
       throw new InternalStateException("Should never have InvalidDateReception thrown here.", e);
     }
   }
@@ -195,10 +194,10 @@ public class CalculatorService {
           spendingRangeRepository.latest(),
           dayGap);
     } catch (EmptyRepositoryException e) {
-      logger.warn(e.getMessage());
+      log.warn(e.getMessage());
       return List.of();
     } catch (InvalidDateException e) {
-      logger.error("Should never have InvalidDateReception thrown here.", e);
+      log.error("Should never have InvalidDateReception thrown here.", e);
       throw new InternalStateException("Should never have InvalidDateReception thrown here.", e);
     }
 
@@ -206,7 +205,7 @@ public class CalculatorService {
 
   List<SpendingRange> calculateAverageDailySpending(LocalDateTime startDate, LocalDateTime endDate)
       throws InvalidDateException {
-    logger.info("Get average daily spending from '" + startDate + "' to '" + endDate + "'.");
+    log.info("Get average daily spending from '" + startDate + "' to '" + endDate + "'.");
     startDate = startDate.withNano(0).withSecond(0).withMinute(0).withHour(0);
     endDate = endDate.withNano(0).withSecond(0).withMinute(0).withHour(0);
 
@@ -218,10 +217,10 @@ public class CalculatorService {
       return calculateAverageWeeklySpending(spendingRangeRepository.earliest(),
           spendingRangeRepository.latest());
     } catch (EmptyRepositoryException e) {
-      logger.warn(e.getMessage());
+      log.warn(e.getMessage());
       return List.of();
     } catch (InvalidDateException e) {
-      logger.error("Should never have InvalidDateReception thrown here.", e);
+      log.error("Should never have InvalidDateReception thrown here.", e);
       throw new InternalStateException("Should never have InvalidDateReception thrown here.", e);
     }
   }
@@ -239,10 +238,10 @@ public class CalculatorService {
       return calculateAverageMonthlySpending(spendingRangeRepository.earliest(),
           spendingRangeRepository.latest());
     } catch (EmptyRepositoryException e) {
-      logger.warn(e.getMessage());
+      log.warn(e.getMessage());
       return List.of();
     } catch (InvalidDateException e) {
-      logger.error("Should never have InvalidDateReception thrown here.", e);
+      log.error("Should never have InvalidDateReception thrown here.", e);
       throw new InternalStateException("Should never have InvalidDateReception thrown here.", e);
     }
   }
@@ -250,11 +249,11 @@ public class CalculatorService {
   List<SpendingRange> calculateAverageMonthlySpending(LocalDateTime startDate,
       LocalDateTime endDate)
       throws InvalidDateException {
-    logger.info("Get average monthly spending from '" + startDate + "' to '" + endDate + ".");
+    log.info("Get average monthly spending from '" + startDate + "' to '" + endDate + ".");
 
     // Exceptional case: dates in wrong order
     if (startDate.isAfter(endDate)) {
-      logger.warn("Start date '" + startDate + "' occurs after end date '" + endDate + "'.");
+      log.warn("Start date '" + startDate + "' occurs after end date '" + endDate + "'.");
       throw InvalidDateException.wrongWayAround(startDate, endDate);
     }
 
@@ -277,35 +276,35 @@ public class CalculatorService {
     var currentMonth = startDate;
 
     while (ChronoUnit.MONTHS.between(currentMonth, startOfEndMonth) > -1) {
-      logger.debug("Current Month = {}. Average Monthly Spending so far {}.", currentMonth,
+      log.debug("Current Month = {}. Average Monthly Spending so far {}.", currentMonth,
           averageSpendingList);
       var startOfMonth = currentMonth.withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0)
           .withNano(0);
 
       if (ChronoUnit.MONTHS.between(startOfMonth, startDate) == 0 && startOfMonth.getMonth()
           .equals(startDate.getMonth())) {
-        logger.debug("Calculating the first month's average.");
+        log.debug("Calculating the first month's average.");
         averageSpendingList.add(calculateAverageOfFractionOfMonth(startDate, endOfStartMonth));
         currentMonth = currentMonth.plusMonths(1);
         continue;
       }
 
       if (ChronoUnit.MONTHS.between(startOfMonth, endDate) == 0) {
-        logger.debug("Calculating the final month's average.");
+        log.debug("Calculating the final month's average.");
         averageSpendingList.add(calculateAverageOfFractionOfMonth(startOfEndMonth, endDate));
         currentMonth = currentMonth.plusMonths(1);
         continue;
       }
 
-      logger.debug("Calculating a middle month's average.");
+      log.debug("Calculating a middle month's average.");
 
       var endOfMonth = startOfMonth.plusMonths(1).minusNanos(1);
       averageSpendingList.add(calculateAverageOfFractionOfMonth(startOfMonth, endOfMonth));
       currentMonth = currentMonth.plusMonths(1);
     }
 
-    logger.debug("Final average monthly spending list:");
-    averageSpendingList.stream().map(SpendingRange::toString).forEach(logger::debug);
+    log.debug("Final average monthly spending list:");
+    averageSpendingList.stream().map(SpendingRange::toString).forEach(log::debug);
     return averageSpendingList;
 
   }
@@ -313,7 +312,7 @@ public class CalculatorService {
   private SpendingRange calculateAverageOfFractionOfMonth(LocalDateTime startOfMonth,
       LocalDateTime endOfMonth) throws InvalidDateException {
     var spending = calculateSpending(startOfMonth, endOfMonth);
-    logger.debug("Total spending for this month {}.", spending);
+    log.debug("Total spending for this month {}.", spending);
     var differenceInSeconds = ChronoUnit.NANOS.between(startOfMonth, endOfMonth);
     var secondDay = ChronoUnit.DAYS.getDuration().toNanos();
     var average = spending.getUsage()
@@ -325,18 +324,18 @@ public class CalculatorService {
         endOfMonth,
         average
     );
-    logger.debug("Average spending for this month {}.", spendingRange);
+    log.debug("Average spending for this month {}.", spendingRange);
     return spendingRange;
   }
 
   List<SpendingRange> calculateAverageSpending(LocalDateTime startDate, LocalDateTime endDate,
       int dayGap)
       throws InvalidDateException {
-    logger.info("Get average spending from '{}' to '{}' over '{}' day periods.", startDate,
+    log.info("Get average spending from '{}' to '{}' over '{}' day periods.", startDate,
         endDate, dayGap);
 
     if (startDate.isAfter(endDate)) {
-      logger.warn("Start date '" + startDate + "' occurs after end date '" + endDate + "'.");
+      log.warn("Start date '" + startDate + "' occurs after end date '" + endDate + "'.");
       throw InvalidDateException.wrongWayAround(startDate, endDate);
     }
 
@@ -371,8 +370,8 @@ public class CalculatorService {
       lastEndDate = newEndDate;
     }
 
-    logger.debug("Final average spending list over {} day periods:", dayGap);
-    averageSpendingList.stream().map(SpendingRange::toString).forEach(logger::debug);
+    log.debug("Final average spending list over {} day periods:", dayGap);
+    averageSpendingList.stream().map(SpendingRange::toString).forEach(log::debug);
 
     return averageSpendingList;
 
@@ -382,24 +381,24 @@ public class CalculatorService {
       throws InvalidDateException {
 
     if (startDate.isAfter(endDate)) {
-      logger.warn("Start date '" + startDate + "' occurs after end date '" + endDate + "'.");
+      log.warn("Start date '" + startDate + "' occurs after end date '" + endDate + "'.");
       throw InvalidDateException.wrongWayAround(startDate, endDate);
     }
 
     // get sublist of spending ranges
     var sublist = new ArrayList<>(spendingRangeRepository.getBetweenDates(startDate, endDate));
     sublist.sort(Comparator.comparing(SpendingRange::getStartDate));
-    logger.debug("Sublist of spending ranges between '{}' and '{}':", startDate, endDate);
-    sublist.stream().map(SpendingRange::toString).forEach(logger::debug);
+    log.debug("Sublist of spending ranges between '{}' and '{}':", startDate, endDate);
+    sublist.stream().map(SpendingRange::toString).forEach(log::debug);
 
     if (sublist.size() == 0) {
-      logger.debug("No spending ranges found.");
+      log.debug("No spending ranges found.");
       return new SpendingRange(startDate, endDate, BigDecimal.ZERO);
     }
 
     // handle first case
     var firstSpending = firstSpending(startDate, endDate, sublist.get(0));
-    logger.debug("First spending: " + firstSpending);
+    log.debug("First spending: " + firstSpending);
 
     if (sublist.size() == 1) {
       return new SpendingRange(startDate, endDate, firstSpending);
@@ -407,14 +406,14 @@ public class CalculatorService {
 
     // handle cases where sublist is not size 1
     var middleSpending = middleSpending(sublist);
-    logger.debug("Middle spending: " + middleSpending);
+    log.debug("Middle spending: " + middleSpending);
 
     // handle final case
     var lastSpending = lastSpending(startDate, endDate, sublist.get(sublist.size() - 1));
-    logger.debug("Last spending: " + lastSpending);
+    log.debug("Last spending: " + lastSpending);
 
     var totalSpending = firstSpending.add(middleSpending).add(lastSpending);
-    logger.debug("Total spending: " + totalSpending);
+    log.debug("Total spending: " + totalSpending);
 
     return new SpendingRange(startDate, endDate, totalSpending);
   }

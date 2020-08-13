@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
@@ -23,11 +22,10 @@ import org.springframework.stereotype.Service;
  * @see CalculatorService for calculations
  * @see SpendingRangeMapper for DTO/Model mapping
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class EnergyUsageService {
-
-  private final Logger logger = LoggerFactory.getLogger(EnergyUsageService.class);
 
   @NonNull
   private final SpendingRangeMapper spendingRangeMapper;
@@ -36,14 +34,14 @@ public class EnergyUsageService {
 
 
   public SpendingRangeDTO getAllSpending() {
-    logger.info("Get all spending.");
+    log.info("Get all spending.");
     var spendingRange = this.calculatorService.calculateAllSpending();
     return this.spendingRangeMapper.toDTO(spendingRange);
 
   }
 
   public SpendingRangeDTO getSpendingFrom(LocalDateTime startDate) {
-    logger.info("Get spending from '" + startDate + "'.");
+    log.info("Get spending from '" + startDate + "'.");
 
     var spendingRange = this.calculatorService.calculateSpendingAfterDate(startDate);
     return this.spendingRangeMapper.toDTO(spendingRange);
@@ -51,7 +49,7 @@ public class EnergyUsageService {
   }
 
   public SpendingRangeDTO getSpendingTo(LocalDateTime endDate) {
-    logger.info("Get spending to '" + endDate + "'.");
+    log.info("Get spending to '" + endDate + "'.");
 
     var spendingRange = this.calculatorService.calculateSpendingUntilDate(endDate);
     return this.spendingRangeMapper.toDTO(spendingRange);
@@ -60,7 +58,7 @@ public class EnergyUsageService {
 
   public SpendingRangeDTO getSpendingBetween(LocalDateTime startDate, LocalDateTime endDate)
       throws InvalidDateException {
-    logger.info("Get spending from '" + startDate + "' to '" + endDate + "'.");
+    log.info("Get spending from '" + startDate + "' to '" + endDate + "'.");
 
     var spendingRange = this.calculatorService
         .calculateSpendingBetweenDates(startDate, endDate);
@@ -69,7 +67,7 @@ public class EnergyUsageService {
   }
 
   public List<SpendingRangeDTO> getAverageSpending(int dayGap) {
-    logger.info("Get average spending over all days over '" + dayGap
+    log.info("Get average spending over all days over '" + dayGap
         + "' day periods.");
 
     var averageSpending = this.calculatorService
@@ -83,7 +81,7 @@ public class EnergyUsageService {
   public List<SpendingRangeDTO> getAverageSpending(LocalDateTime startDate, LocalDateTime endDate,
       int dayGap)
       throws InvalidDateException {
-    logger.info("Get average spending from '" + startDate + "' to '" + endDate + "' over '" + dayGap
+    log.info("Get average spending from '" + startDate + "' to '" + endDate + "' over '" + dayGap
         + "' day periods.");
 
     var averageSpending = this.calculatorService
@@ -96,7 +94,7 @@ public class EnergyUsageService {
   }
 
   public List<SpendingRangeDTO> getAverageSpendingBetweenDaily() {
-    logger.info("Get average daily spending over all days.");
+    log.info("Get average daily spending over all days.");
 
     var averageDailySpending = this.calculatorService.calculateAverageDailySpending();
 
@@ -108,7 +106,7 @@ public class EnergyUsageService {
   public List<SpendingRangeDTO> getAverageSpendingBetweenDaily(LocalDateTime startDate,
       LocalDateTime endDate)
       throws InvalidDateException {
-    logger.info("Get average daily spending from '" + startDate + "' to '" + endDate + "'.");
+    log.info("Get average daily spending from '" + startDate + "' to '" + endDate + "'.");
 
     var averageDailySpending = this.calculatorService
         .calculateAverageDailySpending(startDate, endDate);
@@ -120,7 +118,7 @@ public class EnergyUsageService {
   }
 
   public List<SpendingRangeDTO> getAverageSpendingBetweenWeekly() {
-    logger.info("Get average weekly spending over all days.");
+    log.info("Get average weekly spending over all days.");
 
     var averageWeeklySpending = this.calculatorService.calculateAverageWeeklySpending();
 
@@ -132,7 +130,7 @@ public class EnergyUsageService {
   public List<SpendingRangeDTO> getAverageSpendingBetweenWeekly(LocalDateTime startDate,
       LocalDateTime endDate)
       throws InvalidDateException {
-    logger.info("Get average weekly spending from '" + startDate + "' to '" + endDate + "'.");
+    log.info("Get average weekly spending from '" + startDate + "' to '" + endDate + "'.");
 
     var averageWeeklySpending = this.calculatorService
         .calculateAverageWeeklySpending(startDate, endDate);
@@ -144,7 +142,7 @@ public class EnergyUsageService {
   }
 
   public List<SpendingRangeDTO> getAverageSpendingBetweenMonthly() {
-    logger.info("Get average monthly spending over all days.");
+    log.info("Get average monthly spending over all days.");
 
     var averageMonthlySpending = this.calculatorService.calculateAverageMonthlySpending();
 
@@ -156,7 +154,7 @@ public class EnergyUsageService {
   public List<SpendingRangeDTO> getAverageSpendingBetweenMonthly(LocalDateTime startDate,
       LocalDateTime endDate)
       throws InvalidDateException {
-    logger.info("Get average weekly monthly from '" + startDate + "' to '" + endDate + "'.");
+    log.info("Get average weekly monthly from '" + startDate + "' to '" + endDate + "'.");
 
     var averageMonthlySpending = this.calculatorService
         .calculateAverageMonthlySpending(startDate, endDate);

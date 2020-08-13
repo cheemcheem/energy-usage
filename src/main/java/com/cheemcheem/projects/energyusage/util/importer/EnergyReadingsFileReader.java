@@ -15,14 +15,11 @@ import java.util.Comparator;
 import java.util.HashSet;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
-
+@Slf4j
 @RequiredArgsConstructor
 public class EnergyReadingsFileReader {
-
-  private final Logger logger = LoggerFactory.getLogger(EnergyReadingsFileReader.class);
 
   @NonNull
   private final String csvPath;
@@ -30,12 +27,12 @@ public class EnergyReadingsFileReader {
 
   public void initialise() {
     this.systemResource = ClassLoader.getSystemResource(this.csvPath).getPath();
-    logger.debug("Initialised with {} to get {}.", this.csvPath, this.systemResource);
+    log.debug("Initialised with {} to get {}.", this.csvPath, this.systemResource);
   }
 
   public Collection<EnergyReading> getEnergyReadings() throws IOException {
     if (!new File(this.systemResource).exists()) {
-      logger.warn("No input.csv file found!");
+      log.warn("No input.csv file found!");
       return Collections.emptySet();
     }
     if (this.systemResource == null) {
@@ -62,7 +59,7 @@ public class EnergyReadingsFileReader {
     var energyReadings = new ArrayList<>(new HashSet<>(getEnergyReadings()));
 
     if (energyReadings.size() < 2) {
-      logger.warn("Not enough readings to do analysis with.");
+      log.warn("Not enough readings to do analysis with.");
       return Collections.emptySet();
     }
 
