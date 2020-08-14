@@ -5,15 +5,31 @@ import com.cheemcheem.projects.energyusage.util.importer.CSVReadingColumnConvert
 import com.opencsv.bean.CsvCustomBindByPosition;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 
 @Data
+@Entity
 @NoArgsConstructor
 @RequiredArgsConstructor
 public class EnergyReading implements Comparable<EnergyReading> {
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.AUTO)
+  private int energyReadingId;
+
+  @ManyToOne(fetch = FetchType.LAZY, optional = false)
+  @JoinColumn(name = "user_id", nullable = false)
+  private User user;
 
   @CsvCustomBindByPosition(converter = CSVDateColumnConverter.class, position = 0)
   @NonNull
@@ -27,4 +43,5 @@ public class EnergyReading implements Comparable<EnergyReading> {
   public int compareTo(EnergyReading o) {
     return getDate().compareTo(o.getDate());
   }
+
 }

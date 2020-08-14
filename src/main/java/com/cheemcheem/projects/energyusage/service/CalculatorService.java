@@ -16,7 +16,6 @@ import java.util.List;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 
 /**
  * Performs calculations to determine spending between given dates.
@@ -26,10 +25,8 @@ import org.springframework.stereotype.Service;
  * @see SpendingRangeRepository
  */
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class CalculatorService {
-
 
   @NonNull
   private final SpendingRangeRepository spendingRangeRepository;

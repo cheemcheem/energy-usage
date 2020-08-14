@@ -10,7 +10,7 @@ import java.math.RoundingMode;
 
 public class SpendingRangeMapper {
 
-  public SpendingRangeDTO toDTO(SpendingRange source) {
+  public static SpendingRangeDTO toDTO(SpendingRange source) {
 
     return new SpendingRangeDTO(
         LocalDateTimeConverter.format(source.getStartDate()),
@@ -19,7 +19,7 @@ public class SpendingRangeMapper {
     );
   }
 
-  public SpendingRange toModel(SpendingRangeDTO source)
+  public static SpendingRange toModel(SpendingRangeDTO source)
       throws InvalidDateException, InvalidBigDecimalException {
     return new SpendingRange(
         LocalDateTimeConverter.parse(source.getStartDate()),

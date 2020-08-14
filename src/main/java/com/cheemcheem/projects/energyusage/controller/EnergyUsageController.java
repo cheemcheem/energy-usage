@@ -2,11 +2,11 @@ package com.cheemcheem.projects.energyusage.controller;
 
 import com.cheemcheem.projects.energyusage.dto.SpendingRangeDTO;
 import com.cheemcheem.projects.energyusage.exception.InvalidDateException;
+import com.cheemcheem.projects.energyusage.model.User;
 import com.cheemcheem.projects.energyusage.service.EnergyUsageService;
 import com.cheemcheem.projects.energyusage.util.converter.LocalDateTimeConverter;
 import java.time.LocalDateTime;
 import java.util.List;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,13 +22,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api")
 public class EnergyUsageController {
 
-  @NonNull
   private final EnergyUsageService energyUsageService;
+  private final User defaultUser;
 
   @GetMapping("/spending/all")
   public SpendingRangeDTO getAllSpending() {
     log.info("Get all spending.");
-    return energyUsageService.getAllSpending();
+    return energyUsageService.getAllSpending(defaultUser);
   }
 
   @GetMapping("/spending/from")
@@ -36,7 +36,7 @@ public class EnergyUsageController {
       @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime startDate
   ) {
     log.info("Get spending from '" + startDate + "'.");
-    return ResponseEntity.ok(energyUsageService.getSpendingFrom(startDate));
+    return ResponseEntity.ok(energyUsageService.getSpendingFrom(startDate, defaultUser));
 
   }
 
@@ -45,7 +45,7 @@ public class EnergyUsageController {
       @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime endDate
   ) {
     log.info("Get spending to '" + endDate + "'.");
-    return ResponseEntity.ok(energyUsageService.getSpendingTo(endDate));
+    return ResponseEntity.ok(energyUsageService.getSpendingTo(endDate, defaultUser));
 
   }
 
@@ -57,7 +57,8 @@ public class EnergyUsageController {
   ) {
     log.info("Get spending from '" + startDate + "' to '" + endDate + "'.");
     try {
-      return ResponseEntity.ok(energyUsageService.getSpendingBetween(startDate, endDate));
+      return ResponseEntity
+          .ok(energyUsageService.getSpendingBetween(startDate, endDate, defaultUser));
     } catch (InvalidDateException e) {
       log.warn(e.getMessage());
       return ResponseEntity.badRequest().build();
@@ -73,7 +74,8 @@ public class EnergyUsageController {
     log.info("Get average spending from '" + startDate + "' to '" + endDate + "' over '" + 7
         + "' day periods.");
     try {
-      return ResponseEntity.ok(energyUsageService.getAverageSpending(startDate, endDate, 7));
+      return ResponseEntity
+          .ok(energyUsageService.getAverageSpending(startDate, endDate, 7, defaultUser));
     } catch (InvalidDateException e) {
       log.warn(e.getMessage());
       return ResponseEntity.badRequest().build();
@@ -84,7 +86,7 @@ public class EnergyUsageController {
   @GetMapping("/average/all")
   public ResponseEntity<List<SpendingRangeDTO>> getAverageAll() {
     log.info("Get average spending over all days over '" + 7 + "' day periods.");
-    return ResponseEntity.ok(energyUsageService.getAverageSpending(7));
+    return ResponseEntity.ok(energyUsageService.getAverageSpending(7, defaultUser));
 
   }
 
@@ -97,7 +99,7 @@ public class EnergyUsageController {
     log.info("Get average daily spending from '" + startDate + "' to '" + endDate + "'.");
     try {
       return ResponseEntity
-          .ok(energyUsageService.getAverageSpendingBetweenDaily(startDate, endDate));
+          .ok(energyUsageService.getAverageSpendingBetweenDaily(startDate, endDate, defaultUser));
     } catch (InvalidDateException e) {
       log.warn(e.getMessage());
       return ResponseEntity.badRequest().build();
@@ -108,7 +110,7 @@ public class EnergyUsageController {
   @GetMapping("/average/daily/all")
   public ResponseEntity<List<SpendingRangeDTO>> getAverageSpendingDailyAll() {
     log.info("Get average daily spending over all days.");
-    return ResponseEntity.ok(energyUsageService.getAverageSpendingBetweenDaily());
+    return ResponseEntity.ok(energyUsageService.getAverageSpendingBetweenDaily(defaultUser));
 
   }
 
@@ -120,7 +122,7 @@ public class EnergyUsageController {
     log.info("Get average weekly spending from '" + startDate + "' to '" + endDate + "'.");
     try {
       return ResponseEntity
-          .ok(energyUsageService.getAverageSpendingBetweenWeekly(startDate, endDate));
+          .ok(energyUsageService.getAverageSpendingBetweenWeekly(startDate, endDate, defaultUser));
     } catch (InvalidDateException e) {
       log.warn(e.getMessage());
       return ResponseEntity.badRequest().build();
@@ -131,7 +133,7 @@ public class EnergyUsageController {
   @GetMapping("/average/weekly/all")
   public ResponseEntity<List<SpendingRangeDTO>> getAverageSpendingWeeklyAll() {
     log.info("Get average weekly spending over all days.");
-    return ResponseEntity.ok(energyUsageService.getAverageSpendingBetweenWeekly());
+    return ResponseEntity.ok(energyUsageService.getAverageSpendingBetweenWeekly(defaultUser));
   }
 
   @GetMapping("/average/monthly")
@@ -142,7 +144,7 @@ public class EnergyUsageController {
     log.info("Get average monthly spending from '" + startDate + "' to '" + endDate + "'.");
     try {
       return ResponseEntity
-          .ok(energyUsageService.getAverageSpendingBetweenMonthly(startDate, endDate));
+          .ok(energyUsageService.getAverageSpendingBetweenMonthly(startDate, endDate, defaultUser));
     } catch (InvalidDateException e) {
       log.warn(e.getMessage());
       return ResponseEntity.badRequest().build();
@@ -153,7 +155,7 @@ public class EnergyUsageController {
   @GetMapping("/average/monthly/all")
   public ResponseEntity<List<SpendingRangeDTO>> getAverageSpendingMonthlyAll() {
     log.info("Get average monthly spending over all days.");
-    return ResponseEntity.ok(energyUsageService.getAverageSpendingBetweenMonthly());
+    return ResponseEntity.ok(energyUsageService.getAverageSpendingBetweenMonthly(defaultUser));
   }
 
 
