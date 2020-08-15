@@ -1,4 +1,4 @@
-package com.cheemcheem.projects.energyusage.config;
+package com.cheemcheem.projects.energyusage.config.csv;
 
 import com.cheemcheem.projects.energyusage.model.User;
 import com.cheemcheem.projects.energyusage.util.importer.EnergyReadingsFileReader;
@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Profile;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class EnergyReadingConfig {
+public class CSVFileConfiguration {
 
   @NonNull
   private final String csvPath;
@@ -30,7 +30,7 @@ public class EnergyReadingConfig {
 
     return User.builder()
         .energyReading(new HashSet<>(energyReadings))
-        .userId(0)
+        .userId(1)
         .build();
   }
 

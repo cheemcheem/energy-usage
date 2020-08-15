@@ -1,4 +1,4 @@
-package com.cheemcheem.projects.energyusage.service;
+package com.cheemcheem.projects.energyusage.util;
 
 import com.cheemcheem.projects.energyusage.exception.EmptyRepositoryException;
 import com.cheemcheem.projects.energyusage.exception.InternalStateException;
@@ -26,7 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RequiredArgsConstructor
-public class CalculatorService {
+public class Calculator {
 
   @NonNull
   private final SpendingRangeRepository spendingRangeRepository;
@@ -105,7 +105,7 @@ public class CalculatorService {
     return ((double) portionFirst) / ((double) totalFirst);
   }
 
-  SpendingRange calculateAllSpending() {
+  public SpendingRange calculateAllSpending() {
     log.info("Get all spending.");
     try {
       return calculateSpending(spendingRangeRepository.earliest(),
@@ -120,7 +120,7 @@ public class CalculatorService {
     }
   }
 
-  SpendingRange calculateSpendingAfterDate(LocalDateTime startDate) {
+  public SpendingRange calculateSpendingAfterDate(LocalDateTime startDate) {
     log.info("Get spending from '" + startDate + "'.");
     LocalDateTime latest;
 
@@ -142,7 +142,7 @@ public class CalculatorService {
     }
   }
 
-  SpendingRange calculateSpendingUntilDate(LocalDateTime endDate) {
+  public SpendingRange calculateSpendingUntilDate(LocalDateTime endDate) {
     log.info("Get spending to '" + endDate + "'.");
     LocalDateTime earliest;
 
@@ -166,13 +166,13 @@ public class CalculatorService {
 
   }
 
-  SpendingRange calculateSpendingBetweenDates(LocalDateTime startDate, LocalDateTime endDate)
+  public SpendingRange calculateSpendingBetweenDates(LocalDateTime startDate, LocalDateTime endDate)
       throws InvalidDateException {
     log.info("Get spending from '" + startDate + "' to '" + endDate + "'.");
     return calculateSpending(startDate, endDate);
   }
 
-  List<SpendingRange> calculateAverageDailySpending() {
+  public List<SpendingRange> calculateAverageDailySpending() {
     try {
       return calculateAverageDailySpending(spendingRangeRepository.earliest(),
           spendingRangeRepository.latest());
@@ -185,7 +185,7 @@ public class CalculatorService {
     }
   }
 
-  List<SpendingRange> calculateAverageSpending(int dayGap) {
+  public List<SpendingRange> calculateAverageSpending(int dayGap) {
     try {
       return calculateAverageSpending(spendingRangeRepository.earliest(),
           spendingRangeRepository.latest(),
@@ -200,7 +200,8 @@ public class CalculatorService {
 
   }
 
-  List<SpendingRange> calculateAverageDailySpending(LocalDateTime startDate, LocalDateTime endDate)
+  public List<SpendingRange> calculateAverageDailySpending(LocalDateTime startDate,
+      LocalDateTime endDate)
       throws InvalidDateException {
     log.info("Get average daily spending from '" + startDate + "' to '" + endDate + "'.");
     startDate = startDate.withNano(0).withSecond(0).withMinute(0).withHour(0);
@@ -209,7 +210,7 @@ public class CalculatorService {
     return calculateAverageSpending(startDate, endDate, 1);
   }
 
-  List<SpendingRange> calculateAverageWeeklySpending() {
+  public List<SpendingRange> calculateAverageWeeklySpending() {
     try {
       return calculateAverageWeeklySpending(spendingRangeRepository.earliest(),
           spendingRangeRepository.latest());
@@ -222,7 +223,8 @@ public class CalculatorService {
     }
   }
 
-  List<SpendingRange> calculateAverageWeeklySpending(LocalDateTime startDate, LocalDateTime endDate)
+  public List<SpendingRange> calculateAverageWeeklySpending(LocalDateTime startDate,
+      LocalDateTime endDate)
       throws InvalidDateException {
     startDate = startDate.withNano(0).withSecond(0).withMinute(0).withHour(0);
     endDate = endDate.withNano(0).withSecond(0).withMinute(0).withHour(0);
@@ -230,7 +232,7 @@ public class CalculatorService {
     return calculateAverageSpending(startDate, endDate, 7);
   }
 
-  List<SpendingRange> calculateAverageMonthlySpending() {
+  public List<SpendingRange> calculateAverageMonthlySpending() {
     try {
       return calculateAverageMonthlySpending(spendingRangeRepository.earliest(),
           spendingRangeRepository.latest());
@@ -243,7 +245,7 @@ public class CalculatorService {
     }
   }
 
-  List<SpendingRange> calculateAverageMonthlySpending(LocalDateTime startDate,
+  public List<SpendingRange> calculateAverageMonthlySpending(LocalDateTime startDate,
       LocalDateTime endDate)
       throws InvalidDateException {
     log.info("Get average monthly spending from '" + startDate + "' to '" + endDate + ".");
@@ -325,7 +327,8 @@ public class CalculatorService {
     return spendingRange;
   }
 
-  List<SpendingRange> calculateAverageSpending(LocalDateTime startDate, LocalDateTime endDate,
+  public List<SpendingRange> calculateAverageSpending(LocalDateTime startDate,
+      LocalDateTime endDate,
       int dayGap)
       throws InvalidDateException {
     log.info("Get average spending from '{}' to '{}' over '{}' day periods.", startDate,

@@ -8,10 +8,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
-@Data
+@Getter
+@Setter
+@ToString
 @NoArgsConstructor
 @Entity
 public class User {
@@ -20,12 +24,12 @@ public class User {
   @GeneratedValue(strategy = GenerationType.AUTO)
   private int userId;
 
-  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-  private Set<EnergyReading> energyReading;
+  @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+  private Set<EnergyReading> energyReadings;
 
-  User(int userId, Set<EnergyReading> energyReading) {
+  User(int userId, Set<EnergyReading> energyReadings) {
     this.userId = userId;
-    this.energyReading = energyReading;
+    this.energyReadings = energyReadings;
   }
 
   public static UserBuilder builder() {

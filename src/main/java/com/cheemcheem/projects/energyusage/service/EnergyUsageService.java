@@ -6,8 +6,9 @@ import com.cheemcheem.projects.energyusage.model.EnergyReading;
 import com.cheemcheem.projects.energyusage.model.SpendingRange;
 import com.cheemcheem.projects.energyusage.model.User;
 import com.cheemcheem.projects.energyusage.repository.SpendingRangeRepository;
+import com.cheemcheem.projects.energyusage.util.Calculator;
+import com.cheemcheem.projects.energyusage.util.mapper.DTOMapper;
 import com.cheemcheem.projects.energyusage.util.mapper.EnergyReadingsMapper;
-import com.cheemcheem.projects.energyusage.util.mapper.SpendingRangeMapper;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +23,8 @@ import org.springframework.stereotype.Service;
  * The DTO used is {@link SpendingRangeDTO}. The Models used are {@link EnergyReading} and {@link
  * SpendingRange}
  *
- * @see CalculatorService for calculations
- * @see SpendingRangeMapper for DTO/Model mapping
+ * @see Calculator for calculations
+ * @see DTOMapper for DTO/Model mapping
  */
 @Slf4j
 @Service
@@ -31,18 +32,18 @@ import org.springframework.stereotype.Service;
 public class EnergyUsageService {
 
 
-  private CalculatorService getCalculatorService(User user) {
-    var energyReadings = new ArrayList<>(user.getEnergyReading());
+  private Calculator getCalculatorService(User user) {
+    var energyReadings = new ArrayList<>(user.getEnergyReadings());
     var spendingRanges = new EnergyReadingsMapper(energyReadings).getEnergyReadingsRange();
     var spendingRangeRepository = new SpendingRangeRepository(spendingRanges);
-    return new CalculatorService(spendingRangeRepository);
+    return new Calculator(spendingRangeRepository);
   }
 
 
   public SpendingRangeDTO getAllSpending(User user) {
     log.info("Get all spending.");
     var spendingRange = getCalculatorService(user).calculateAllSpending();
-    return SpendingRangeMapper.toDTO(spendingRange);
+    return DTOMapper.toSpendingRangeDTO(spendingRange);
 
   }
 
@@ -50,7 +51,7 @@ public class EnergyUsageService {
     log.info("Get spending from '" + startDate + "'.");
 
     var spendingRange = getCalculatorService(user).calculateSpendingAfterDate(startDate);
-    return SpendingRangeMapper.toDTO(spendingRange);
+    return DTOMapper.toSpendingRangeDTO(spendingRange);
 
   }
 
@@ -58,7 +59,7 @@ public class EnergyUsageService {
     log.info("Get spending to '" + endDate + "'.");
 
     var spendingRange = getCalculatorService(user).calculateSpendingUntilDate(endDate);
-    return SpendingRangeMapper.toDTO(spendingRange);
+    return DTOMapper.toSpendingRangeDTO(spendingRange);
 
   }
 
@@ -69,7 +70,7 @@ public class EnergyUsageService {
 
     var spendingRange = getCalculatorService(user)
         .calculateSpendingBetweenDates(startDate, endDate);
-    return SpendingRangeMapper.toDTO(spendingRange);
+    return DTOMapper.toSpendingRangeDTO(spendingRange);
 
   }
 
@@ -81,7 +82,7 @@ public class EnergyUsageService {
         .calculateAverageSpending(dayGap);
 
     return averageSpending.stream()
-        .map(SpendingRangeMapper::toDTO)
+        .map(DTOMapper::toSpendingRangeDTO)
         .collect(Collectors.toList());
   }
 
@@ -95,7 +96,7 @@ public class EnergyUsageService {
         .calculateAverageSpending(startDate, endDate, dayGap);
 
     return averageSpending.stream()
-        .map(SpendingRangeMapper::toDTO)
+        .map(DTOMapper::toSpendingRangeDTO)
         .collect(Collectors.toList());
 
   }
@@ -106,7 +107,7 @@ public class EnergyUsageService {
     var averageDailySpending = getCalculatorService(user).calculateAverageDailySpending();
 
     return averageDailySpending.stream()
-        .map(SpendingRangeMapper::toDTO)
+        .map(DTOMapper::toSpendingRangeDTO)
         .collect(Collectors.toList());
   }
 
@@ -119,7 +120,7 @@ public class EnergyUsageService {
         .calculateAverageDailySpending(startDate, endDate);
 
     return averageDailySpending.stream()
-        .map(SpendingRangeMapper::toDTO)
+        .map(DTOMapper::toSpendingRangeDTO)
         .collect(Collectors.toList());
 
   }
@@ -130,7 +131,7 @@ public class EnergyUsageService {
     var averageWeeklySpending = getCalculatorService(user).calculateAverageWeeklySpending();
 
     return averageWeeklySpending.stream()
-        .map(SpendingRangeMapper::toDTO)
+        .map(DTOMapper::toSpendingRangeDTO)
         .collect(Collectors.toList());
   }
 
@@ -143,7 +144,7 @@ public class EnergyUsageService {
         .calculateAverageWeeklySpending(startDate, endDate);
 
     return averageWeeklySpending.stream()
-        .map(SpendingRangeMapper::toDTO)
+        .map(DTOMapper::toSpendingRangeDTO)
         .collect(Collectors.toList());
 
   }
@@ -154,7 +155,7 @@ public class EnergyUsageService {
     var averageMonthlySpending = getCalculatorService(user).calculateAverageMonthlySpending();
 
     return averageMonthlySpending.stream()
-        .map(SpendingRangeMapper::toDTO)
+        .map(DTOMapper::toSpendingRangeDTO)
         .collect(Collectors.toList());
   }
 
@@ -167,7 +168,7 @@ public class EnergyUsageService {
         .calculateAverageMonthlySpending(startDate, endDate);
 
     return averageMonthlySpending.stream()
-        .map(SpendingRangeMapper::toDTO)
+        .map(DTOMapper::toSpendingRangeDTO)
         .collect(Collectors.toList());
 
   }
