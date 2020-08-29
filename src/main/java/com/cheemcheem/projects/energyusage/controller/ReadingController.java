@@ -48,4 +48,12 @@ public class ReadingController {
     log.info("Getting all readings for user {}.", user);
     return ResponseEntity.ok(this.energyReadingService.convertReadingsForUser(user));
   }
+
+  @GetMapping("/last")
+  public ResponseEntity<EnergyReadingDTO> getLastReading(
+      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User user) {
+    log.info("Get last reading.");
+    log.info("Getting last reading for user {}.", user);
+    return ResponseEntity.ok(this.energyReadingService.getLastReadingForUser(user));
+  }
 }

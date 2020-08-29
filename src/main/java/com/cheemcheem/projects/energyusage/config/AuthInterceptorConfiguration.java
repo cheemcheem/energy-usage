@@ -13,4 +13,5 @@ public class AuthInterceptorConfiguration implements WebMvcConfigurer {
   public void addInterceptors(InterceptorRegistry registry) {
     registry.addInterceptor(new AuthInterceptor());
   }
+
 }

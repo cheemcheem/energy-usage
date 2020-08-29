@@ -1,0 +1,20 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" factoryName="Spring Boot" name="EnergyUsageApplication Dev"
+    type="SpringBootApplicationConfigurationType">
+    <envs>
+      <env name="JPA_URL" value="jdbc:h2:mem:testdb"/>
+      <env name="JPA_USERNAME" value="sa"/>
+      <env name="JPA_PASSWORD" value="password"/>
+      <env name="GITHUB_CLIENT_ID" value="20eb29fc0740d20557a5"/>
+      <env name="GITHUB_CLIENT_SECRET" value="e9964b51d6b6a1c5aabd73d25efbf36b1396a21d"/>
+    </envs>
+    <method v="2">
+      <option enabled="true" name="Make"/>
+    </method>
+    <module name="energy-usage"/>
+    <option name="ALTERNATIVE_JRE_PATH"/>
+    <option name="SPRING_BOOT_MAIN_CLASS"
+      value="com.cheemcheem.projects.energyusage.EnergyUsageApplication"/>
+    <option name="ACTIVE_PROFILES" value="csv,dev,debug"/>
+  </configuration>
+</component>

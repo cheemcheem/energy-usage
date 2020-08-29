@@ -20,6 +20,7 @@ public class CSVInterceptor implements HandlerInterceptor {
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
       Object handler) {
     log.debug("CSVInterceptor.preHandle");
+    log.debug(request.getServletPath());
     if (Constants.DO_NOT_INTERCEPT.test(request.getServletPath())) {
       return true;
     }

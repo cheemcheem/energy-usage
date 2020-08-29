@@ -1,0 +1,55 @@
+#app {
+  height: 100vh;
+  width: 100vw;
+
+}
+
+#app > header {
+  height: var(--header-height);
+  width: auto;
+
+  padding-left: 15px;
+  padding-right: 15px;
+  top: 0;
+
+  background: var(--header-background);
+  color: var(--header-color);
+
+  display: flex;
+  flex-direction: row;
+  align-items: center; /* vertical /*/
+  justify-content: space-between; /* horizontal */
+}
+
+#app > main {
+  height: calc(100vh - var(--header-height));
+  width: 100vw;
+
+  background: var(--main-background);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* horizontal /*/
+  justify-content: space-evenly; /* vertical */
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+  font-weight: bolder;
+}
+
+.tooltip .tooltip-text {
+  visibility: hidden;
+  width: 120px;
+  height: 40px;
+  font-weight: normal;
+
+  position: absolute;
+  z-index: 1;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+}

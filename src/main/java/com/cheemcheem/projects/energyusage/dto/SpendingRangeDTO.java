@@ -7,9 +7,9 @@ import lombok.NonNull;
 public class SpendingRangeDTO {
 
   @NonNull
-  private final String startDate;
+  private final String startDateISO;
   @NonNull
-  private final String endDate;
+  private final String endDateISO;
   @NonNull
   private final String usage;
 }

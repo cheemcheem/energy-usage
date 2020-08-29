@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class EnergyReadingDTO {
 
-  private String date;
+  private String dateISO;
 
   private String reading;
 

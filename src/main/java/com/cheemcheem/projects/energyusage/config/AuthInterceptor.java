@@ -13,6 +13,7 @@ public class AuthInterceptor implements HandlerInterceptor {
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
       Object handler) {
     log.debug("AuthInterceptor.preHandle");
+    log.debug(request.getServletPath());
     return Constants.DO_NOT_INTERCEPT.test(request.getServletPath());
 
     // code that adds user id to request attributes from request session

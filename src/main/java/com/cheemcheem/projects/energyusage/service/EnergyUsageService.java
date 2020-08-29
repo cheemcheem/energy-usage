@@ -172,4 +172,17 @@ public class EnergyUsageService {
         .collect(Collectors.toList());
 
   }
+
+  public SpendingRangeDTO getLastAverageSpendingBetweenMonthly(User user) {
+    log.info("Get last average monthly spending.");
+
+    var averageMonthlySpending = getCalculatorService(user).calculateAverageMonthlySpending();
+
+    var averages = averageMonthlySpending.stream()
+        .sorted()
+        .map(DTOMapper::toSpendingRangeDTO)
+        .collect(Collectors.toList());
+
+    return averages.get(averages.size() - 1);
+  }
 }

@@ -35,7 +35,7 @@ public class EnergyUsageController {
 
   @GetMapping("/spending/from")
   public ResponseEntity<SpendingRangeDTO> getSpendingFrom(
-      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime startDate,
+      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.CSV_PATTERN) LocalDateTime startDate,
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User user
   ) {
     log.info("Get spending from '" + startDate + "'.");
@@ -44,7 +44,7 @@ public class EnergyUsageController {
 
   @GetMapping("/spending/to")
   public ResponseEntity<SpendingRangeDTO> getSpendingTo(
-      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime endDate,
+      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.CSV_PATTERN) LocalDateTime endDate,
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User user
   ) {
     log.info("Get spending to '" + endDate + "'.");
@@ -54,8 +54,8 @@ public class EnergyUsageController {
 
   @GetMapping("/spending/between")
   public ResponseEntity<SpendingRangeDTO> getSpendingBetween(
-      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime startDate,
-      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime endDate,
+      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.CSV_PATTERN) LocalDateTime startDate,
+      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.CSV_PATTERN) LocalDateTime endDate,
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User user
   ) {
     log.info("Get spending from '" + startDate + "' to '" + endDate + "'.");
@@ -71,8 +71,8 @@ public class EnergyUsageController {
 
   @GetMapping("/average/between")
   public ResponseEntity<List<SpendingRangeDTO>> getAverageSpendingBetween(
-      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime startDate,
-      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime endDate,
+      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.CSV_PATTERN) LocalDateTime startDate,
+      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.CSV_PATTERN) LocalDateTime endDate,
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User user
   ) {
     log.info("Get average spending from '" + startDate + "' to '" + endDate + "' over '" + 7
@@ -98,8 +98,8 @@ public class EnergyUsageController {
 
   @GetMapping("/average/daily")
   public ResponseEntity<List<SpendingRangeDTO>> getAverageSpendingDaily(
-      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime startDate,
-      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime endDate,
+      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.CSV_PATTERN) LocalDateTime startDate,
+      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.CSV_PATTERN) LocalDateTime endDate,
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User user
   ) {
     log.info("Get average daily spending from '" + startDate + "' to '" + endDate + "'.");
@@ -122,8 +122,8 @@ public class EnergyUsageController {
 
   @GetMapping("/average/weekly")
   public ResponseEntity<List<SpendingRangeDTO>> getAverageSpendingWeekly(
-      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime startDate,
-      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime endDate,
+      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.CSV_PATTERN) LocalDateTime startDate,
+      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.CSV_PATTERN) LocalDateTime endDate,
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User user
   ) {
     log.info("Get average weekly spending from '" + startDate + "' to '" + endDate + "'.");
@@ -146,8 +146,8 @@ public class EnergyUsageController {
 
   @GetMapping("/average/monthly")
   public ResponseEntity<List<SpendingRangeDTO>> getAverageSpendingMonthly(
-      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime startDate,
-      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.PATTERN) LocalDateTime endDate,
+      @RequestParam("startDate") @DateTimeFormat(pattern = LocalDateTimeConverter.CSV_PATTERN) LocalDateTime startDate,
+      @RequestParam("endDate") @DateTimeFormat(pattern = LocalDateTimeConverter.CSV_PATTERN) LocalDateTime endDate,
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User user
   ) {
     log.info("Get average monthly spending from '" + startDate + "' to '" + endDate + "'.");
@@ -166,6 +166,13 @@ public class EnergyUsageController {
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User user) {
     log.info("Get average monthly spending over all days.");
     return ResponseEntity.ok(energyUsageService.getAverageSpendingBetweenMonthly(user));
+  }
+
+  @GetMapping("/average/monthly/last")
+  public ResponseEntity<SpendingRangeDTO> getLastAverageSpendingMonthly(
+      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User user) {
+    log.info("Get last average monthly spending.");
+    return ResponseEntity.ok(energyUsageService.getLastAverageSpendingBetweenMonthly(user));
   }
 
 

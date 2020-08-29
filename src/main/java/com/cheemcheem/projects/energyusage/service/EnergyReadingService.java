@@ -56,4 +56,18 @@ public class EnergyReadingService {
     return converted;
   }
 
+  public EnergyReadingDTO getLastReadingForUser(User user) {
+    log.info("EnergyReadingService.getLastReadingForUser");
+    log.debug("Getting last energy reading for user {}.", user);
+
+    var ordered = user.getEnergyReadings()
+        .stream()
+        .sorted()
+        .collect(Collectors.toList());
+
+    var last = DTOMapper.toEnergyReadingDTO(ordered.get(ordered.size() - 1));
+    log.debug("Last energy reading: {}.", last);
+
+    return last;
+  }
 }

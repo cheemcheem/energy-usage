@@ -12,7 +12,7 @@ public class CSVDateColumnConverter extends AbstractBeanField<EnergyReading> {
   @Override
   protected Object convert(String value) throws CsvDataTypeMismatchException {
     try {
-      return LocalDateTimeConverter.parse(value);
+      return LocalDateTimeConverter.parseCSV(value);
     } catch (InvalidDateException e) {
       throw new CsvDataTypeMismatchException(value, Date.class, e.getMessage());
     }

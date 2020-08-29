@@ -14,8 +14,8 @@ public class DTOMapper {
 
   public static SpendingRangeDTO toSpendingRangeDTO(SpendingRange source) {
     return new SpendingRangeDTO(
-        LocalDateTimeConverter.format(source.getStartDate()),
-        LocalDateTimeConverter.format(source.getEndDate()),
+        LocalDateTimeConverter.formatISO(source.getStartDate()),
+        LocalDateTimeConverter.formatISO(source.getEndDate()),
         BigDecimalConverter.format(source.getUsage().setScale(2, RoundingMode.HALF_UP))
     );
   }
@@ -23,14 +23,14 @@ public class DTOMapper {
   public static EnergyReading toEnergyReadingModel(EnergyReadingDTO source)
       throws InvalidDateException, InvalidBigDecimalException {
     return new EnergyReading(
-        LocalDateTimeConverter.parse(source.getDate()),
+        LocalDateTimeConverter.parseISO(source.getDateISO()),
         BigDecimalConverter.parse(source.getReading())
     );
   }
 
   public static EnergyReadingDTO toEnergyReadingDTO(EnergyReading source) {
     return new EnergyReadingDTO(
-        LocalDateTimeConverter.format(source.getDate()),
+        LocalDateTimeConverter.formatISO(source.getDate()),
         BigDecimalConverter.format(source.getReading())
     );
   }
