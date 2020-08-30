@@ -15,6 +15,6 @@
     <option name="ALTERNATIVE_JRE_PATH"/>
     <option name="SPRING_BOOT_MAIN_CLASS"
       value="com.cheemcheem.projects.energyusage.EnergyUsageApplication"/>
-    <option name="ACTIVE_PROFILES" value="csv,dev,debug"/>
+    <option name="ACTIVE_PROFILES" value="csv,dev"/>
   </configuration>
 </component>

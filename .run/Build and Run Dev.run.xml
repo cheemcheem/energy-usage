@@ -6,7 +6,7 @@
       <env name="JPA_PASSWORD" value="password"/>
       <env name="GITHUB_CLIENT_ID" value="20eb29fc0740d20557a5"/>
       <env name="GITHUB_CLIENT_SECRET" value="e9964b51d6b6a1c5aabd73d25efbf36b1396a21d"/>
-      <env name="spring_profiles_active" value="csv,dev,debug"/>
+      <env name="spring_profiles_active" value="dev,debug"/>
     </envs>
     <method v="2">
       <option enabled="true" file="$PROJECT_DIR$/pom.xml" goal="clean package"

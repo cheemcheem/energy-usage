@@ -1,10 +1,10 @@
 :root {
   --content-width: 500px;
   --content-height: 500px;
+  --content-margin-bottom: 5px;
   --content-color: black;
   --content-link-color: blue;
   --content-background: rgb(239, 239, 239);
-  /*-internal-light-dark(rgb(239, 239, 239), rgb(74, 74, 74))*/
 
   --content-inner-width: 250px;
   --content-inner-height: 40px;
@@ -21,6 +21,7 @@
   --content-border-radius: 8px;
 
   --header-height: 40px;
+  --header-margin-bottom: 5px;
   --header-color: white;
   --header-background: blue;
 
@@ -90,6 +91,7 @@ header a {
 .content {
   width: var(--content-width);
   height: var(--content-height);
+  margin-bottom: var(--content-margin-bottom);
   background: var(--content-background);
   color: var(--content-color);
 

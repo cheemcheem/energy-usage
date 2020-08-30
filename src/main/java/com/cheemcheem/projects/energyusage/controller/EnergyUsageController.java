@@ -26,6 +26,27 @@ public class EnergyUsageController {
 
   private final EnergyUsageService energyUsageService;
 
+  @GetMapping("/spending/daily/all")
+  public ResponseEntity<List<SpendingRangeDTO>> getTotalSpendinDailyAll(
+      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User user) {
+    log.info("Get total daily spending over all days.");
+    return ResponseEntity.ok(energyUsageService.getTotalSpendingDaily(user));
+  }
+
+  @GetMapping("/spending/weekly/all")
+  public ResponseEntity<List<SpendingRangeDTO>> getTotalSpendingWeeklyAll(
+      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User user) {
+    log.info("Get total weekly spending over all days.");
+    return ResponseEntity.ok(energyUsageService.getTotalSpendingWeekly(user));
+  }
+
+  @GetMapping("/spending/monthly/all")
+  public ResponseEntity<List<SpendingRangeDTO>> getTotalSpendingMonthlyAll(
+      @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User user) {
+    log.info("Get total monthly spending over all days.");
+    return ResponseEntity.ok(energyUsageService.getTotalSpendingMonthly(user));
+  }
+
   @GetMapping("/spending/all")
   public SpendingRangeDTO getAllSpending(
       @RequestAttribute(Constants.USER_ID_ATTRIBUTE_KEY) User user) {

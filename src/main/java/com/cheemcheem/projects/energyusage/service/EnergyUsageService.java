@@ -39,6 +39,35 @@ public class EnergyUsageService {
     return new Calculator(spendingRangeRepository);
   }
 
+  public List<SpendingRangeDTO> getTotalSpendingDaily(User user) {
+    log.info("Get total weekly spending over all days.");
+
+    var totalDailySpending = getCalculatorService(user).calculateTotalDailySpending();
+
+    return totalDailySpending.stream()
+        .map(DTOMapper::toSpendingRangeDTO)
+        .collect(Collectors.toList());
+  }
+
+  public List<SpendingRangeDTO> getTotalSpendingWeekly(User user) {
+    log.info("Get total weekly spending over all days.");
+
+    var totalWeeklySpending = getCalculatorService(user).calculateTotalWeeklySpending();
+
+    return totalWeeklySpending.stream()
+        .map(DTOMapper::toSpendingRangeDTO)
+        .collect(Collectors.toList());
+  }
+
+  public List<SpendingRangeDTO> getTotalSpendingMonthly(User user) {
+    log.info("Get total monthly spending over all days.");
+
+    var totalMonthlySpending = getCalculatorService(user).calculateTotalMonthlySpending();
+
+    return totalMonthlySpending.stream()
+        .map(DTOMapper::toSpendingRangeDTO)
+        .collect(Collectors.toList());
+  }
 
   public SpendingRangeDTO getAllSpending(User user) {
     log.info("Get all spending.");

@@ -17,7 +17,7 @@ export default function LoginPage() {
               <div id="login-container" className={"content-rounded-border-box content"}>
                 <h1>Please log in to continue</h1>
                 <a href={href} className="content-rounded-border-box content-inner">
-                  <span>Log in with GitHub</span>
+                  <span>Log in with GitHub (OAuth2)</span>
                 </a>
               </div>
             </>}
