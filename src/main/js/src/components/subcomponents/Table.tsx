@@ -3,16 +3,10 @@ import {DarkModeContext} from "../../contexts/DarkModeContext";
 import {AgGridReact} from "ag-grid-react";
 import {ColDef, ColGroupDef, ValueFormatterParams} from "ag-grid-community";
 import MainContent from "./MainContent";
+import {TableProps} from "../../common/Props";
 
-export default function Table({title, url, dateField, dateFieldColumn, numberField, numberFieldColumn, dateTimeFormatOptions}: {
-  title: string,
-  url: string,
-  dateField: string,
-  dateFieldColumn: string,
-  numberField: string,
-  numberFieldColumn: string,
-  dateTimeFormatOptions: Intl.DateTimeFormatOptions
-}) {
+export default function Table(props: TableProps) {
+  const {dateField, dateFieldColumn, dateTimeFormatOptions, numberField, numberFieldColumn, title, url} = props;
   const {isDarkMode} = useContext(DarkModeContext);
   const configuredNumberFormatter = useMemo(
       () => configuredNumberValueFormatter(numberField),

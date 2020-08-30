@@ -1,4 +1,4 @@
-export type RegularProps = {
+type RegularProps = {
   title: string,
   url: string,
   dateField: string,
@@ -6,4 +6,8 @@ export type RegularProps = {
   numberField: string,
   numberFieldColumn: string,
   dateTimeFormatOptions: Intl.DateTimeFormatOptions
-}
+};
+
+export type ChartProps = RegularProps & { navigator?: { min: number, max: number } };
+
+export type TableProps = RegularProps;

@@ -1,10 +1,13 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useContext, useEffect, useMemo, useState} from "react";
 import MainContent from "../subcomponents/MainContent";
 import {AgChartsReact} from "ag-charts-react";
 import {presetDateValueFormatter} from "./Table";
-import {RegularProps} from "../../common/Props";
+import {ChartProps} from "../../common/Props";
+import {DarkModeContext} from "../../contexts/DarkModeContext";
 
-export default function Chart(props: RegularProps & { navigator?: { min: number, max: number } }) {
+export default function Chart(props: ChartProps) {
+
+  const {isDarkMode} = useContext(DarkModeContext);
 
   const {dateField, dateFieldColumn, dateTimeFormatOptions, numberField, numberFieldColumn, title, url, navigator} = useMemo(() => props, [props]);
 
@@ -28,8 +31,10 @@ export default function Chart(props: RegularProps & { navigator?: { min: number,
     .catch(console.error)
   }, [url, numberField, dateField, setData, presetDateFormatter]);
 
+  const mainColour = useMemo(() => isDarkMode ? "#FFFFFF" : "#000000", [isDarkMode]);
+  const backgroundColour = useMemo(() => isDarkMode ? "#000000" : "#FFFFFF", [isDarkMode]);
 
-  const options = {
+  const options = useMemo(() => ({
     data,
     title: {
       enabled: false,
@@ -41,9 +46,7 @@ export default function Chart(props: RegularProps & { navigator?: { min: number,
       xKey: dateField,
       xName: dateFieldColumn,
       yKeys: [numberField],
-      yNames: [numberFieldColumn],
-      fills: ['blue'],
-      fillOpacity: 0.5
+      yNames: [numberFieldColumn]
     }],
     legend: {enabled: false},
     axes: [
@@ -54,7 +57,10 @@ export default function Chart(props: RegularProps & { navigator?: { min: number,
         },
         type: 'number',
         position: 'left',
-        label: {formatter: ({value}: any) => `£${value}`}
+        label: {formatter: ({value}: any) => `£${value}`, color: mainColour},
+        line: {color: mainColour},
+        tick: {color: mainColour},
+        gridStyle: [{stroke: '#333333', lineDash: [1, 0]}]
       },
       {
         title: {
@@ -63,7 +69,10 @@ export default function Chart(props: RegularProps & { navigator?: { min: number,
         },
         type: 'category',
         position: 'bottom',
-        label: {rotation: 45}
+        label: {rotation: 45, color: mainColour},
+        line: {color: mainColour},
+        tick: {color: mainColour},
+        gridStyle: [{lineDash: [1, 0]}]
       }
     ],
     navigator: {
@@ -71,8 +80,11 @@ export default function Chart(props: RegularProps & { navigator?: { min: number,
       height: 30,
       min: navigator?.min ?? 0.30,
       max: navigator?.max ?? 0.80
+    },
+    background: {
+      fill: backgroundColour
     }
-  }
+  }), [backgroundColour, data, dateField, dateFieldColumn, mainColour, navigator, numberField, numberFieldColumn, title]);
 
   // don't render unless ready, otherwise navigator won't work by default
   return <MainContent header={title} body={
