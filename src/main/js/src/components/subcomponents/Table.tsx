@@ -1,9 +1,14 @@
 import React, {useContext, useEffect, useMemo, useState} from "react";
 import {DarkModeContext} from "../../contexts/DarkModeContext";
 import {AgGridReact} from "ag-grid-react";
-import {ColDef, ColGroupDef, ValueFormatterParams} from "ag-grid-community";
+import {ColDef, ColGroupDef} from "ag-grid-community";
 import MainContent from "./MainContent";
 import {TableProps} from "../../common/Props";
+import {
+  configuredDateValueFormatter,
+  configuredNumberValueFormatter,
+  presetDateValueFormatter
+} from "../../common/Utilities";
 
 export default function Table(props: TableProps) {
   const {dateField, dateFieldColumn, dateTimeFormatOptions, numberField, numberFieldColumn, title, url} = props;
@@ -68,24 +73,3 @@ export default function Table(props: TableProps) {
       extraBodyClass={`ag-theme-alpine${isDarkMode ? "-dark" : ""}`}
   />;
 }
-
-
-export const presetNumberValueFormatter = new Intl.NumberFormat("en-GB", {
-  style: "currency",
-  currency: "GBP"
-});
-
-export const configuredNumberValueFormatter =
-    (paramName: string) =>
-        (value: ValueFormatterParams) =>
-            presetNumberValueFormatter.format(value.data[paramName]);
-
-export const presetDateValueFormatter =
-    (options: Intl.NumberFormatOptions) =>
-        new Intl.DateTimeFormat('en-GB', options);
-
-export const configuredDateValueFormatter =
-    (presetDateValueFormatter: Intl.DateTimeFormat) =>
-        (paramName: string) =>
-            (value: ValueFormatterParams) =>
-                presetDateValueFormatter.format(value.data[paramName]);

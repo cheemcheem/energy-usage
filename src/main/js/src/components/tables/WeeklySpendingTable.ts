@@ -3,12 +3,12 @@ import {useMemo} from "react";
 
 export default function WeeklySpendingTable() {
   return Table(useMemo(() => ({
-    title: "Weekly Usage",
+    title: "Weekly Spending",
     url: "/api/spending/weekly/all",
     dateField: "startDateISO",
     dateFieldColumn: "Week",
     numberField: "usage",
-    numberFieldColumn: "Weekly Usage",
+    numberFieldColumn: "Weekly Spending",
     dateTimeFormatOptions: {
       year: 'numeric',
       month: 'long',

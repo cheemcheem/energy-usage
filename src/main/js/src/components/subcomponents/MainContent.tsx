@@ -1,7 +1,9 @@
 import React from "react";
 import ErrorBoundary from "../../common/ErrorBoundary";
+import {MainContentProps} from "../../common/Props";
 
-export default function MainContent({header, body, extraBodyClass}: { header: string, body?: React.ReactNode, extraBodyClass?: string }) {
+export default function MainContent(props: MainContentProps) {
+  const {header, body, extraBodyClass} = props;
   return <MainContentErrorBoundary>
     <div className="content content-rounded-border-box">
       <div className="content-header">

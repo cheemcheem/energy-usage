@@ -1,3 +1,5 @@
+import React from "react";
+
 type RegularProps = {
   title: string,
   url: string,
@@ -11,3 +13,5 @@ type RegularProps = {
 export type ChartProps = RegularProps & { navigator?: { min: number, max: number } };
 
 export type TableProps = RegularProps;
+
+export type MainContentProps = { header: string, body?: React.ReactNode, extraBodyClass?: string };

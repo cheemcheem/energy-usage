@@ -1,9 +1,9 @@
 import React, {useContext, useEffect, useMemo, useState} from "react";
 import MainContent from "../subcomponents/MainContent";
 import {AgChartsReact} from "ag-charts-react";
-import {presetDateValueFormatter} from "./Table";
 import {ChartProps} from "../../common/Props";
 import {DarkModeContext} from "../../contexts/DarkModeContext";
+import {presetDateValueFormatter} from "../../common/Utilities";
 
 export default function Chart(props: ChartProps) {
 

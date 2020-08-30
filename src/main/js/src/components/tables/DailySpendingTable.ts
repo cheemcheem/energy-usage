@@ -3,12 +3,12 @@ import {useMemo} from "react";
 
 export default function DailySpendingTable() {
   return Table(useMemo(() => ({
-    title: "Daily Usage",
-    url: "/api/average/daily/all",
+    title: "Daily Spending",
+    url: "/api/spending/daily/all",
     dateField: "startDateISO",
     dateFieldColumn: "Date",
     numberField: "usage",
-    numberFieldColumn: "Usage",
+    numberFieldColumn: "Spending",
     dateTimeFormatOptions: {
       year: 'numeric',
       month: 'long',
