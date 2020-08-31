@@ -17,7 +17,7 @@ import lombok.ToString;
 @Setter
 @ToString
 @NoArgsConstructor
-@Entity
+@Entity(name = "user_table")
 public class User {
 
   @Id

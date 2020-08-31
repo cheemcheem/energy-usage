@@ -16,11 +16,16 @@ export default function GroupContent(props: GroupContentProps) {
     <div className="content content-rounded-border-box">
       <div className="content-header content-header-group">
         <span>{header}</span>
-        <div style={{borderLeft: "solid grey 2px"}} className={"content-header-group"}>
-          <span className={visibleElement === "chart" ? "content-body-selectable" : ""}
-                onClick={setValue("table")}>Table</span>
-          <span className={visibleElement === "table" ? "content-body-selectable" : ""}
-                onClick={setValue("chart")}>Chart</span>
+        <div className={"content-header-group"}>
+          <button disabled={visibleElement === "table"}
+                  className={`${visibleElement === "chart" ? "content-body-selectable" : ""}`}
+                  onClick={setValue("table")}>Table
+          </button>
+          <span className="content-body-button-divider"/>
+          <button disabled={visibleElement === "chart"}
+                  className={`${visibleElement === "table" ? "content-body-selectable" : ""}`}
+                  onClick={setValue("chart")}>Chart
+          </button>
         </div>
       </div>
       <div style={{display: visibleElement === "chart" ? "unset" : "none"}}

@@ -13,6 +13,10 @@
   --content-inner-background: white;
 
   --content-with-header-header-link-colour: blue;
+  --content-with-header-header-padding-vertical: 0;
+  --content-with-header-header-span-padding-horizontal: 15px;
+  --content-with-header-header-button-height: 40px;
+  --content-with-header-header-button-width: 50px;
   --content-with-header-header-height: 50px;
   --content-with-header-body-height: calc(var(--content-height) - var(--content-with-header-header-height));
 
@@ -134,15 +138,15 @@ header a {
 }
 
 .content-header {
-  width: var(--content-width);
+  width: calc(var(--content-width) - 2 * var(--content-with-header-header-span-padding-horizontal));
   height: var(--content-with-header-header-height);
-  padding-top: 15px;
-  padding-bottom: 15px;
+  padding-top: var(--content-with-header-header-padding-vertical);
+  padding-bottom: var(--content-with-header-header-padding-vertical);
 }
 
-.content-header span {
-  padding-left: 15px;
-  padding-right: 15px;
+.content-header-group {
+  /*padding-left: var(--content-with-header-header-span-padding-horizontal);*/
+  /*padding-right: var(--content-with-header-header-span-padding-horizontal);*/
 }
 
 .content-header-group {
@@ -152,9 +156,25 @@ header a {
   justify-content: space-between; /* horizontal */
 }
 
+.content-header button {
+  height: var(--content-with-header-header-button-height);
+  width: var(--content-with-header-header-button-width);
+  border: none;
+  font: unset;
+  padding: 0;
+}
+
 .content-body {
   width: var(--content-width);
   height: var(--content-with-header-body-height);
+}
+
+span.content-body-button-divider {
+  height: var(--content-with-header-header-button-height);
+  width: 0;
+  border: none;
+  border-left: 2px solid grey;
+  padding: 0;
 }
 
 .content-body-selectable {
@@ -165,4 +185,8 @@ header a {
 .content-body-selectable:hover {
   font-weight: bold;
   cursor: grabbing;
+}
+
+.content-body-selectable:focus {
+  outline: none;
 }
