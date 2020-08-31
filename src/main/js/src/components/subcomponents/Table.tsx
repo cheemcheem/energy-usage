@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useMemo, useState} from "react";
 import {DarkModeContext} from "../../contexts/DarkModeContext";
 import {AgGridReact} from "ag-grid-react";
 import {ColDef, ColGroupDef} from "ag-grid-community";
-import MainContent from "./MainContent";
+import ContentBody from "./ContentBody";
 import {TableProps} from "../../common/Props";
 import {
   configuredDateValueFormatter,
@@ -11,7 +11,7 @@ import {
 } from "../../common/Utilities";
 
 export default function Table(props: TableProps) {
-  const {dateField, dateFieldColumn, dateTimeFormatOptions, numberField, numberFieldColumn, title, url} = props;
+  const {dateField, dateFieldColumn, dateTimeFormatOptions, numberField, numberFieldColumn, url} = props;
   const {isDarkMode} = useContext(DarkModeContext);
   const configuredNumberFormatter = useMemo(
       () => configuredNumberValueFormatter(numberField),
@@ -31,6 +31,8 @@ export default function Table(props: TableProps) {
     {
       headerName: dateFieldColumn,
       field: dateField,
+      filter: 'agDateColumnFilter',
+      rowDrag: true,
       sortable: true,
       comparator: (valueA, valueB, nodeA, nodeB) => nodeA.data[dateField] - nodeB.data[dateField],
       minWidth: 150,
@@ -39,6 +41,7 @@ export default function Table(props: TableProps) {
     {
       headerName: numberFieldColumn,
       field: numberField,
+      filter: 'agNumberColumnFilter',
       sortable: true,
       minWidth: 100,
       valueFormatter: configuredNumberFormatter
@@ -62,12 +65,13 @@ export default function Table(props: TableProps) {
     .catch(console.error)
   }, [url, numberField, dateField, setRowData]);
 
-  return <MainContent
-      header={title}
+  return <ContentBody
       body={<AgGridReact
           defaultColDef={defaultColDef}
           columnDefs={columnDefs}
           rowData={rowData}
+          rowDragManaged
+          rowSelection="multiple"
           onFirstDataRendered={event => event.api.sizeColumnsToFit()}
       />}
       extraBodyClass={`ag-theme-alpine${isDarkMode ? "-dark" : ""}`}

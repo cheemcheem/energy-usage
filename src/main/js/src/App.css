@@ -12,6 +12,7 @@
   --content-inner-link-color: blue;
   --content-inner-background: white;
 
+  --content-with-header-header-link-colour: blue;
   --content-with-header-header-height: 50px;
   --content-with-header-body-height: calc(var(--content-height) - var(--content-with-header-header-height));
 
@@ -49,6 +50,8 @@
     --content-inner-color: white;
     --content-inner-link-color: blue;
     --content-inner-background: darkgrey;
+
+    --content-with-header-header-link-colour: lightblue;
 
     --content-border-color: grey;
 
@@ -133,11 +136,20 @@ header a {
 .content-header {
   width: var(--content-width);
   height: var(--content-with-header-header-height);
-  padding: 15px;
+  padding-top: 15px;
+  padding-bottom: 15px;
 }
 
-.content-header > span {
-  padding: 15px;
+.content-header span {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.content-header-group {
+  display: flex;
+  flex-direction: row;
+  align-items: center; /* vertical /*/
+  justify-content: space-between; /* horizontal */
 }
 
 .content-body {
@@ -145,3 +157,12 @@ header a {
   height: var(--content-with-header-body-height);
 }
 
+.content-body-selectable {
+  font-weight: bold;
+  color: var(--content-with-header-header-link-colour);
+}
+
+.content-body-selectable:hover {
+  font-weight: bold;
+  cursor: grabbing;
+}

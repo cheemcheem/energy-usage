@@ -1,7 +1,6 @@
 import React from "react";
 
 type RegularProps = {
-  title: string,
   url: string,
   dateField: string,
   dateFieldColumn: string,
@@ -14,4 +13,6 @@ export type ChartProps = RegularProps & { navigator?: { min: number, max: number
 
 export type TableProps = RegularProps;
 
-export type MainContentProps = { header: string, body?: React.ReactNode, extraBodyClass?: string };
+export type BaseContentProps = { body?: React.ReactNode, extraBodyClass?: string };
+export type MainContentProps = { header: string, body?: React.ReactNode };
+export type GroupContentProps = { header: string, chart: React.ReactNode, table: React.ReactNode, extraBodyClass?: string };

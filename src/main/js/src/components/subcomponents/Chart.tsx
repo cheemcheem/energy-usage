@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useMemo, useState} from "react";
-import MainContent from "../subcomponents/MainContent";
+import ContentBody from "./ContentBody";
 import {AgChartsReact} from "ag-charts-react";
 import {ChartProps} from "../../common/Props";
 import {DarkModeContext} from "../../contexts/DarkModeContext";
@@ -9,7 +9,7 @@ export default function Chart(props: ChartProps) {
 
   const {isDarkMode} = useContext(DarkModeContext);
 
-  const {dateField, dateFieldColumn, dateTimeFormatOptions, numberField, numberFieldColumn, title, url, navigator} = useMemo(() => props, [props]);
+  const {dateField, dateFieldColumn, dateTimeFormatOptions, numberField, numberFieldColumn, url, navigator} = useMemo(() => props, [props]);
 
   const presetDateFormatter = useMemo(
       () => presetDateValueFormatter(dateTimeFormatOptions),
@@ -36,10 +36,6 @@ export default function Chart(props: ChartProps) {
 
   const options = useMemo(() => ({
     data,
-    title: {
-      enabled: false,
-      text: title
-    },
     autoSize: true,
     series: [{
       type: 'column',
@@ -84,10 +80,10 @@ export default function Chart(props: ChartProps) {
     background: {
       fill: backgroundColour
     }
-  }), [backgroundColour, data, dateField, dateFieldColumn, mainColour, navigator, numberField, numberFieldColumn, title]);
+  }), [backgroundColour, data, dateField, dateFieldColumn, mainColour, navigator, numberField, numberFieldColumn]);
 
   // don't render unless ready, otherwise navigator won't work by default
-  return <MainContent header={title} body={
+  return <ContentBody body={
     data.length > 0
         ? <AgChartsReact options={options}/>
         : <></>
