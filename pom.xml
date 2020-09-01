@@ -3,65 +3,70 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <parent>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-parent</artifactId>
-    <version>2.2.1.RELEASE</version>
-    <relativePath/> <!-- lookup parent from repository -->
-  </parent>
-  <groupId>com.cheemcheem.projects</groupId>
+
   <artifactId>energy-usage</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
-  <name>energy-usage</name>
-  <description>Analyse Energy Consumption</description>
+  <build>
+    <finalName>${project.artifactId}</finalName>
+  </build>
+  <dependencies>
+    <dependency>
+      <artifactId>opencsv</artifactId>
+      <groupId>com.opencsv</groupId>
+      <version>4.6</version>
+    </dependency>
+    <dependency>
+      <artifactId>spring-boot-starter-oauth2-client</artifactId>
+      <groupId>org.springframework.boot</groupId>
+    </dependency>
+  </dependencies>
+
+  <description>Analyse Energy Consumption.</description>
+  <developers>
+    <developer>
+      <email>kathan@cheem.uk</email>
+      <name>Kathan Cheema</name>
+      <url>https://cheem.uk</url>
+    </developer>
+  </developers>
+  <licenses>
+    <license>
+      <distribution>repo</distribution>
+      <name>GNU General Public License v3.0</name>
+      <url>https://spdx.org/licenses/GPL-3.0-or-later.html</url>
+    </license>
+  </licenses>
+
+  <name>Energy Usage</name>
+
+  <packaging>jar</packaging>
+
+  <parent>
+    <artifactId>spring-boot-react-parent</artifactId>
+    <groupId>dev.cheem.projects</groupId>
+    <version>1.1.0</version>
+  </parent>
 
   <properties>
-    <java.version>13</java.version>
+    <github.username>cheemcheem</github.username>
   </properties>
 
-  <dependencies>
+  <repositories>
+    <repository>
+      <id>github</id>
+      <name>GitHub Packages</name>
+      <url>https://maven.pkg.github.com/cheemcheem/spring-boot-react-parent</url>
+    </repository>
+  </repositories>
 
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
-		</dependency>
+  <scm>
+    <connection>scm:git:git://github.com/${github.username}/${project.artifactId}.git</connection>
+    <developerConnection>scm:git:ssh://github.com:${github.username}/${project.artifactId}.git
+    </developerConnection>
+    <url>https://github.com/${github.username}/${project.artifactId}/tree/master</url>
+  </scm>
 
-		<dependency>
-			<artifactId>lombok</artifactId>
-			<groupId>org.projectlombok</groupId>
-			<version>1.18.10</version>
-		</dependency>
-		<dependency>
-			<groupId>com.opencsv</groupId>
-			<artifactId>opencsv</artifactId>
-			<version>4.6</version>
-		</dependency>
+  <url>https://energy.cheem.uk</url>
 
-		<dependency>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>junit-vintage-engine</artifactId>
-					<groupId>org.junit.vintage</groupId>
-				</exclusion>
-			</exclusions>
-			<groupId>org.springframework.boot</groupId>
-			<scope>test</scope>
-		</dependency>
-
-	</dependencies>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
-	</build>
+  <version>1.0.0</version>
 
 </project>

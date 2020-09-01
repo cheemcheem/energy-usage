@@ -8,6 +8,7 @@ import com.cheemcheem.projects.energyusage.exception.InvalidDateException;
 import com.cheemcheem.projects.energyusage.model.SpendingRange;
 import com.cheemcheem.projects.energyusage.repository.SpendingRangeRepository;
 import com.cheemcheem.projects.energyusage.tests.util.LocalDateTimeHelper;
+import com.cheemcheem.projects.energyusage.util.Calculator;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -22,13 +23,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 @ExtendWith(SpringExtension.class)
-class CalculatorServiceTest {
+class CalculatorTest {
 
 
   private final List<SpendingRange> spendingRanges = new ArrayList<>();
   private final SpendingRangeRepository spendingRangeRepository = new SpendingRangeRepository(
       spendingRanges);
-  private final CalculatorService calculatorService = new CalculatorService(
+  private final Calculator calculator = new Calculator(
       spendingRangeRepository);
 
   @BeforeEach
@@ -51,8 +52,8 @@ class CalculatorServiceTest {
 
   @Test
   void contextLoads() {
-    assertThat(calculatorService).isNotNull();
-    assertThat(calculatorService.calculateAllSpending()).isNotNull();
+    assertThat(calculator).isNotNull();
+    assertThat(calculator.calculateAllSpending()).isNotNull();
   }
 
   @Nested
@@ -66,7 +67,7 @@ class CalculatorServiceTest {
           .toLocalDateTime(LocalDateTimeHelper.DAY + LocalDateTimeHelper.HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(2.50).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateSpendingBetweenDates(requestStartDate, requestEndDate);
       var resultUsage = result.getUsage().setScale(2, RoundingMode.HALF_UP);
       assertThat(resultUsage).isEqualTo(expectedUsage);
@@ -82,7 +83,7 @@ class CalculatorServiceTest {
           .toLocalDateTime(2 * LocalDateTimeHelper.DAY + LocalDateTimeHelper.QUARTER_DAY);
       var expectedUsage = BigDecimal.valueOf(5.00).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateSpendingBetweenDates(requestStartDate, requestEndDate);
       var resultUsage = result.getUsage().setScale(2, RoundingMode.HALF_UP);
       assertThat(resultUsage).isEqualTo(expectedUsage);
@@ -97,7 +98,7 @@ class CalculatorServiceTest {
           .toLocalDateTime(LocalDateTimeHelper.DAY + LocalDateTimeHelper.HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(5.00).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateSpendingBetweenDates(requestStartDate, requestEndDate);
       var resultUsage = result.getUsage().setScale(2, RoundingMode.HALF_UP);
       assertThat(resultUsage).isEqualTo(expectedUsage);
@@ -112,7 +113,7 @@ class CalculatorServiceTest {
           .toLocalDateTime(2 * LocalDateTimeHelper.DAY + LocalDateTimeHelper.HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(15.00).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateSpendingBetweenDates(requestStartDate, requestEndDate);
       var resultUsage = result.getUsage().setScale(2, RoundingMode.HALF_UP);
       assertThat(resultUsage).isEqualTo(expectedUsage);
@@ -135,7 +136,7 @@ class CalculatorServiceTest {
           .toLocalDateTime(4 * LocalDateTimeHelper.DAY + LocalDateTimeHelper.HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(30.00).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateSpendingBetweenDates(requestStartDate, requestEndDate);
       var resultUsage = result.getUsage().setScale(2, RoundingMode.HALF_UP);
       assertThat(resultUsage).isEqualTo(expectedUsage);
@@ -151,7 +152,7 @@ class CalculatorServiceTest {
           .toLocalDateTime(4 * LocalDateTimeHelper.DAY + LocalDateTimeHelper.HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(30.00).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateSpendingBetweenDates(requestStartDate, requestEndDate);
       var resultUsage = result.getUsage().setScale(2, RoundingMode.HALF_UP);
       assertThat(resultUsage).isEqualTo(expectedUsage);
@@ -167,7 +168,7 @@ class CalculatorServiceTest {
           .toLocalDateTime(4 * LocalDateTimeHelper.DAY + LocalDateTimeHelper.HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(5.00).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateSpendingBetweenDates(requestStartDate, requestEndDate);
       var resultUsage = result.getUsage().setScale(2, RoundingMode.HALF_UP);
       assertThat(resultUsage).isEqualTo(expectedUsage);
@@ -181,7 +182,7 @@ class CalculatorServiceTest {
       var endDate = LocalDateTimeHelper.toLocalDateTime(1);
 
       assertThrows(InvalidDateException.class,
-          () -> calculatorService.calculateSpendingBetweenDates(startDate, endDate));
+          () -> calculator.calculateSpendingBetweenDates(startDate, endDate));
     }
 
     @Test
@@ -193,7 +194,7 @@ class CalculatorServiceTest {
       var expectedUsage = BigDecimal.valueOf(0.00).setScale(2, RoundingMode.HALF_UP);
 
       AtomicReference<SpendingRange> resultHolder = new AtomicReference<>();
-      assertDoesNotThrow(() -> resultHolder.set(calculatorService
+      assertDoesNotThrow(() -> resultHolder.set(calculator
           .calculateSpendingBetweenDates(requestStartDate, requestEndDate)));
 
       var result = resultHolder.get();
@@ -206,9 +207,9 @@ class CalculatorServiceTest {
     @Test
     void handlesEmptyRepository() {
       spendingRanges.clear();
-      assertDoesNotThrow(calculatorService::calculateAllSpending);
+      assertDoesNotThrow(calculator::calculateAllSpending);
       Assertions.assertDoesNotThrow(
-          () -> calculatorService.calculateSpendingBetweenDates(
+          () -> calculator.calculateSpendingBetweenDates(
               LocalDateTimeHelper.toLocalDateTime(1), LocalDateTimeHelper.toLocalDateTime(2)));
     }
 
@@ -224,7 +225,7 @@ class CalculatorServiceTest {
           .toLocalDateTime(LocalDateTimeHelper.DAY + LocalDateTimeHelper.QUARTER_DAY);
       var expectedUsage = BigDecimal.valueOf(2.50).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateSpendingBetweenDates(requestStartDate, requestEndDate);
       var resultUsage = result.getUsage().setScale(2, RoundingMode.HALF_UP);
       assertThat(resultUsage).isEqualTo(expectedUsage);
@@ -239,7 +240,7 @@ class CalculatorServiceTest {
           .toLocalDateTime(2 * LocalDateTimeHelper.DAY + LocalDateTimeHelper.QUARTER_DAY);
       var expectedUsage = BigDecimal.valueOf(12.50).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateSpendingBetweenDates(requestStartDate, requestEndDate);
       var resultUsage = result.getUsage().setScale(2, RoundingMode.HALF_UP);
       assertThat(resultUsage).isEqualTo(expectedUsage);
@@ -254,7 +255,7 @@ class CalculatorServiceTest {
           .toLocalDateTime(4 * LocalDateTimeHelper.DAY + LocalDateTimeHelper.HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(10).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateSpendingBetweenDates(requestStartDate, requestEndDate);
       var resultUsage = result.getUsage().setScale(2, RoundingMode.HALF_UP);
       assertThat(resultUsage).isEqualTo(expectedUsage);
@@ -274,7 +275,7 @@ class CalculatorServiceTest {
       var requestEndDate = LocalDateTimeHelper.toLocalDateTime(2 * LocalDateTimeHelper.DAY);
       var expectedUsage = BigDecimal.valueOf(7.50).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateSpendingBetweenDates(requestStartDate, requestEndDate);
       var resultUsage = result.getUsage().setScale(2, RoundingMode.HALF_UP);
       assertThat(resultUsage).isEqualTo(expectedUsage);
@@ -289,7 +290,7 @@ class CalculatorServiceTest {
       var requestEndDate = LocalDateTimeHelper.toLocalDateTime(3 * LocalDateTimeHelper.DAY);
       var expectedUsage = BigDecimal.valueOf(12.50).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateSpendingBetweenDates(requestStartDate, requestEndDate);
       var resultUsage = result.getUsage().setScale(2, RoundingMode.HALF_UP);
       assertThat(resultUsage).isEqualTo(expectedUsage);
@@ -303,7 +304,7 @@ class CalculatorServiceTest {
       var requestEndDate = LocalDateTimeHelper.toLocalDateTime(2 * LocalDateTimeHelper.DAY);
       var expectedUsage = BigDecimal.valueOf(10.00).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateSpendingBetweenDates(requestStartDate, requestEndDate);
       var resultUsage = result.getUsage().setScale(2, RoundingMode.HALF_UP);
       assertThat(resultUsage).isEqualTo(expectedUsage);
@@ -317,7 +318,7 @@ class CalculatorServiceTest {
       var requestEndDate = LocalDateTimeHelper.toLocalDateTime(3 * LocalDateTimeHelper.DAY);
       var expectedUsage = BigDecimal.valueOf(20.00).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateSpendingBetweenDates(requestStartDate, requestEndDate);
       var resultUsage = result.getUsage().setScale(2, RoundingMode.HALF_UP);
       assertThat(resultUsage).isEqualTo(expectedUsage);
@@ -336,7 +337,7 @@ class CalculatorServiceTest {
       var requestEndDate = LocalDateTimeHelper.toLocalDateTime(LocalDateTimeHelper.DAY);
       var expectedUsage = BigDecimal.valueOf(0.00).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateAverageDailySpending(requestStartDate, requestEndDate);
       var resultUsage = result.stream()
           .map(SpendingRange::getUsage)
@@ -354,7 +355,7 @@ class CalculatorServiceTest {
           .toLocalDateTime(LocalDateTimeHelper.DAY + LocalDateTimeHelper.HALF_DAY);
       var expectedUsage = BigDecimal.valueOf(0.00).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateAverageDailySpending(requestStartDate, requestEndDate);
       var resultUsage = result.stream()
           .map(SpendingRange::getUsage)
@@ -371,7 +372,7 @@ class CalculatorServiceTest {
       var requestEndDate = LocalDateTimeHelper.toLocalDateTime(2 * LocalDateTimeHelper.DAY);
       var expectedUsage = BigDecimal.valueOf(10.00).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateAverageDailySpending(requestStartDate, requestEndDate);
       var resultUsage = result.stream()
           .map(SpendingRange::getUsage)
@@ -389,7 +390,7 @@ class CalculatorServiceTest {
       var requestEndDate = LocalDateTimeHelper.toLocalDateTime(3 * LocalDateTimeHelper.DAY);
       var expectedUsage = BigDecimal.valueOf(20.00).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateAverageDailySpending(requestStartDate, requestEndDate);
       var resultUsage = result.stream()
           .map(SpendingRange::getUsage)
@@ -407,7 +408,7 @@ class CalculatorServiceTest {
       var requestEndDate = LocalDateTimeHelper.toLocalDateTime(4 * LocalDateTimeHelper.DAY);
       var expectedUsage = BigDecimal.valueOf(30.00).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateAverageDailySpending(requestStartDate, requestEndDate);
       var resultUsage = result.stream()
           .map(SpendingRange::getUsage)
@@ -451,7 +452,7 @@ class CalculatorServiceTest {
       var requestEndDate = LocalDateTimeHelper.toLocalDateTime(11 * LocalDateTimeHelper.DAY);
       var expectedUsage = BigDecimal.valueOf(100.00).setScale(2, RoundingMode.HALF_UP);
 
-      var result = calculatorService
+      var result = calculator
           .calculateAverageDailySpending(requestStartDate, requestEndDate);
       var resultUsage = result.stream()
           .map(SpendingRange::getUsage)
@@ -469,7 +470,7 @@ class CalculatorServiceTest {
       var endDate = LocalDateTimeHelper.toLocalDateTime(LocalDateTimeHelper.DAY);
 
       assertThrows(InvalidDateException.class,
-          () -> calculatorService.calculateAverageDailySpending(startDate, endDate));
+          () -> calculator.calculateAverageDailySpending(startDate, endDate));
     }
   }
 
@@ -482,7 +483,7 @@ class CalculatorServiceTest {
       var endDate = LocalDateTimeHelper.toLocalDateTime(LocalDateTimeHelper.DAY);
 
       assertThrows(InvalidDateException.class,
-          () -> calculatorService.calculateAverageWeeklySpending(startDate, endDate));
+          () -> calculator.calculateAverageWeeklySpending(startDate, endDate));
     }
 
 
@@ -523,7 +524,7 @@ class CalculatorServiceTest {
       var expectedWeekThree = new SpendingRange(startThree, endThree, valThree);
       var expectedWeekFour = new SpendingRange(startFour, endFour, valFour);
 
-      var results = calculatorService.calculateAverageWeeklySpending();
+      var results = calculator.calculateAverageWeeklySpending();
 
       assertThat(results)
           .containsExactlyInAnyOrder(expectedWeekOne, expectedWeekTwo, expectedWeekThree,
@@ -540,7 +541,7 @@ class CalculatorServiceTest {
       var endDate = LocalDateTimeHelper.toLocalDateTime(LocalDateTimeHelper.DAY);
 
       assertThrows(InvalidDateException.class,
-          () -> calculatorService.calculateAverageMonthlySpending(startDate, endDate));
+          () -> calculator.calculateAverageMonthlySpending(startDate, endDate));
     }
 
     @Test
@@ -563,7 +564,7 @@ class CalculatorServiceTest {
 
       var expectedMonthOne = new SpendingRange(startOne, endOne, valOne);
       var expectedMonthTwo = new SpendingRange(startTwo, endTwo, valTwo);
-      var results = calculatorService.calculateAverageMonthlySpending();
+      var results = calculator.calculateAverageMonthlySpending();
 
       assertThat(results).containsExactlyInAnyOrder(expectedMonthOne, expectedMonthTwo);
 
