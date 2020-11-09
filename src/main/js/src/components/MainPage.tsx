@@ -11,6 +11,7 @@ import DailySpendingGroup from "./groups/DailySpendingGroup";
 import MainContent from "./subcomponents/MainContent";
 import WeeklySpendingGroup from "./groups/WeeklySpendingGroup";
 import MonthlySpendingGroup from "./groups/MonthlySpendingGroup";
+import NewPage from "./NewPage";
 
 export default function MainPage({fullName, userName, logout}: { fullName: string, userName: string, logout: () => any }) {
   const isDarkMode = useMediaQuery("(prefers-color-scheme: dark)", false);
@@ -31,5 +32,6 @@ export default function MainPage({fullName, userName, logout}: { fullName: strin
     <WeeklySpendingGroup/>
     <MonthlySpendingGroup/>
     <MainContent header={"Reading"} body={<ReadingTable/>}/>
+    <MainContent header={"Add"} body={<NewPage/>}/>
   </DarkModeContext.Provider>}/>;
 }
