@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: energy-usage-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: energy-usage
+  template:
+    metadata:
+      labels:
+        app: energy-usage
+    spec:
+      containers:
+      - image: cheemcheem/energy-usage:<TAG>
+        name: energy-usage-container
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 30
+          failureThreshold: 1
+          periodSeconds: 10
+        env:
+        - name: JPA_URL
+          valueFrom:
+            secretKeyRef:
+              name: <SECRET_NAME>
+              key: ENERGY_JPA_URL
+        - name: JPA_DB
+          valueFrom:
+            secretKeyRef:
+              name: <SECRET_NAME>
+              key: ENERGY_JPA_DB
+        - name: JPA_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: <SECRET_NAME>
+              key: ENERGY_JPA_USERNAME
+        - name: JPA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: <SECRET_NAME>
+              key: ENERGY_JPA_PASSWORD
+        - name: GITHUB_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: <SECRET_NAME>
+              key: ENERGY_GITHUB_CLIENT_ID
+        - name: GITHUB_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: <SECRET_NAME>
+              key: ENERGY_GITHUB_CLIENT_SECRET
+        - name: spring_profiles_active
+          value: prod
+        - name: SERVER_PORT
+          value: "8080"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: energy-usage-service
+spec:
+  selector:
+     app: energy-usage
+  type: ClusterIP
+  ports:
+    - name: energy-usage-port
+      port: 8080
